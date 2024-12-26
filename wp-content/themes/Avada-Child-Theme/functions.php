@@ -2,6 +2,8 @@
 
 function theme_enqueue_styles() {
     wp_enqueue_style( 'child-style', get_stylesheet_directory_uri() . '/style.css', [] );
+	
+	wp_enqueue_script( 'stein-custom', get_stylesheet_directory_uri() . '/js/custom.js', array('jquery'), true );
 }
 add_action( 'wp_enqueue_scripts', 'theme_enqueue_styles', 20 );
 

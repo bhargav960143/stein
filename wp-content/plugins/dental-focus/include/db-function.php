@@ -1,5 +1,15 @@
 <?php
 class dentalfocus_db_function{
+    function dentalfocus_query($qrySelect){
+        global $wpdb;
+        $resData = $wpdb->get_results($qrySelect, ARRAY_A);
+        if (count($resData) > 0) {
+            return $resData;
+        }
+        else{
+            return 0;
+        }
+    }
 	function dentalfocus_insert_records($df_table_name,$array_insert,$return_type = false){
 		global $wpdb;
 		$qryInsert = "INSERT INTO $df_table_name";

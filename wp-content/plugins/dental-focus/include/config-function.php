@@ -543,6 +543,10 @@ function dentalfocus_messagedisplay(){
                 $messageText = "Record has been successfully updated.";
                 $divClass = 'updated';
                 break;
+            case "imn":
+                $messageText = "Invalid record number, please try again.";
+                $divClass = 'error';
+                break;
             default:
                 $messageText = "Something went wrong please try again.";
                 $divClass = 'error';
@@ -550,6 +554,88 @@ function dentalfocus_messagedisplay(){
         ?><div class="updated <?php echo $divClass; ?> below-h4">
         <h4><?php echo $messageText; ?></h4>
         </div><?php
+    }
+}
+
+function dentalfocus_export_members() {
+    // Check for the custom action in the URL
+    if (isset($_GET['action']) && $_GET['action'] === 'export_members_df') {
+        ob_start();
+
+        // Database call to fetch records
+        $objDB = new dentalfocus_db_function();
+        $resData = $objDB->dentalfocus_select_all_records('trentium_membership_users');
+
+        if (!empty($resData)) {
+            // CSV Header Row
+            $csv_header_row = "Mbr #,last_name,first_name,spouse/partner,street_address,city,state,zip,country,HomePhone,cell_phone,email address,chapter,master_steinologist,paid_until,eProsit,Date Paid,NoList,Pmt Terms,FirstYear,Mbr Status,Notes,ReferdBy,collecting_interests\n";
+
+            $output = $csv_header_row;
+
+            // CSV Content Rows
+            foreach ($resData as $valueData) {
+                $csv_row_content = '"' . implode('","', array_map('addslashes', $valueData)) . '"' . "\n";
+                $output .= $csv_row_content;
+            }
+
+            // Generate and Output CSV
+            $today = date("Y-m-d");
+            $filename = "MMT_all_members_sorted_" . $today . ".csv";
+
+            header('Content-Type: text/csv');
+            header('Content-Disposition: attachment; filename=' . $filename);
+            echo $output;
+            exit;
+        } else {
+            // Redirect if no data is found
+            wp_redirect("admin.php?page=tssettings&tab=members&msg=swr");
+            exit;
+        }
+    }
+}
+function dentalfocus_backup_members() {
+    // Check for the custom action in the URL
+    if (isset($_GET['action']) && $_GET['action'] === 'backup_members_df') {
+        ob_start();
+
+        // Database call to fetch records
+        $objDB = new dentalfocus_db_function();
+        $resData = $objDB->dentalfocus_select_all_records('trentium_membership_users');
+
+        if (!empty($resData)) {
+            $i = 0;
+            $csv_header_row = '';
+            foreach($resData[0] as $keyDataField => $valueDataField){
+                if($i == 0){
+                    $csv_header_row .= $keyDataField;
+                }
+                else{
+                    $csv_header_row .= ',' . $keyDataField;
+                }
+                $i++;
+            }
+            $csv_header_row .= "\n";
+            $output = $csv_header_row;
+
+            // CSV Content Rows
+            foreach ($resData as $valueData) {
+                $csv_row_content = '"' . implode('","', array_map('addslashes', $valueData)) . '"' . "\n";
+                $output .= $csv_row_content;
+            }
+
+            // Generate and Output CSV
+            $today = date("Y-m-d");
+            $filename = "Users_" . $today . ".csv";
+
+            header('Content-Type: text/csv');
+            header('Content-Disposition: attachment; filename=' . $filename);
+            echo $output;
+            exit;
+        } else {
+            // Redirect if no data is found
+            wp_redirect("admin.php?page=tssettings&tab=members&msg=swr");
+            exit;
+        }
     }
 }
 ?>

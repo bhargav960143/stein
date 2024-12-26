@@ -11,6 +11,8 @@ Text Domain:  Avada
 .full-width-button { width: 100%; }
 .fusion-tb-header .search-icon { width: 60px !important; height: 60px !important; display: flex; align-items: center; justify-content: center; }
 .fusion-page-title-bar .fusion-page-title-wrapper h1 { margin-bottom: 20px; }
+.fusion-tb-header .fusion-search-element { position: absolute; right: 10px; bottom: -50px; opacity: 0; visibility: hidden; }
+.fusion-tb-header .fusion-search-element.open-search { opacity: 1; visibility: visible; }
 
 .counter-boxes-style.fusion-content-boxes .fusion-column .content-box-wrapper { min-height: 100px; display: flex; align-items: center; flex-wrap: wrap; padding: 20px; }
 .counter-boxes-style.fusion-content-boxes .heading { margin: 0; }

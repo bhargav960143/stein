@@ -19,3 +19,5 @@ add_action('init', 'init_dentalfocus');
 add_action('init', 'dentalfocus_custom_cms_register');
 add_action('init', 'dentalfocus_custom_register_taxonomy');
 add_action('admin_enqueue_scripts', 'dentalfocus_register_css_js');
+add_action('admin_post_export_members_df', 'dentalfocus_export_members');
+add_action('admin_post_backup_members_df', 'dentalfocus_backup_members');

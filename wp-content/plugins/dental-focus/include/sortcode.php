@@ -5,8 +5,185 @@ if (!is_admin()) {
     add_shortcode('ts_membership_sortcode', 'ts_membership_sortcode');
     add_shortcode('ts_paypal_return_sortcode', 'handle_return_page');
     add_shortcode('ts_paypal_registration_sortcode', 'handle_registration_page');
+    add_shortcode('ts_member_search_result_sortcode', 'handle_member_search_result_page');
 }
 add_action('init', 'ts_membership_form_handle_submission');
+
+function handle_member_search_result_page()
+{
+    ob_start();
+
+    $last_name = NULL;
+    $chapter = NULL;
+    $spouse = NULL;
+    $state = NULL;
+    $country = NULL;
+    if (isset($_REQUEST['last_name']) && !empty($_REQUEST['last_name'])) {
+        $last_name = $_REQUEST['last_name'];
+    }
+    if (isset($_REQUEST['chapter']) && !empty($_REQUEST['chapter'])) {
+        $chapter = $_REQUEST['chapter'];
+    }
+    if (isset($_REQUEST['spouse']) && !empty($_REQUEST['spouse'])) {
+        $spouse = $_REQUEST['spouse'];
+    }
+    if (isset($_REQUEST['state']) && !empty($_REQUEST['state'])) {
+        $state = $_REQUEST['state'];
+    }
+    if (isset($_REQUEST['country']) && !empty($_REQUEST['country'])) {
+        $country = $_REQUEST['country'];
+    }
+
+    if (get_current_user_id() == 602 or get_current_user_id() == 2 or get_current_user_id() == 567 or get_current_user_id() == 98) {
+        $DBA = "yes";
+    } else {
+        $DBA = "no";
+    }
+
+    $PARM_preamble = " This is the member search by <u>";
+    $searchtype = $_GET["search_type"];
+    $prepare_params = "SELECT
+    member_no,
+    customer_first_name,
+    customer_last_name,
+    customer_spouse,
+    customer_address,
+    customer_city,
+    customer_state,
+    customer_zip,
+    customer_country,
+    customer_home_phone,
+    customer_email,
+    chapter,
+    master_steinologist,
+    local_chapter_officer,
+    collecting_interests,
+    paid_until,
+    first_class,
+    paid_qtr,
+    cell_phone,
+    No_list,
+    chapter_position,
+    referred_by,
+    SubCode,
+    FirstYear,
+    PastMember,
+    Notes
+FROM
+    trentium_membership_users
+WHERE
+    PastMember = 0 AND customer_last_name <> ''";
+
+    if ($DBA == "no") {
+        $prepare_params .= " AND No_list <> 'N'";
+    }
+
+    if ($searchtype == "name") {
+        $PARM_preamble .= "Last Name like " . $last_name . ".</u>";
+        $prepare_params .= " AND customer_last_name LIKE '%" . $last_name . "%'";
+    }
+    if ($searchtype == "chapter") {
+        $PARM_preamble .= "Chapter = " . $chapter . ".</u>";
+        $prepare_params .= " AND chapter = '" . $chapter . "'";
+    }
+    if ($searchtype == "spouse") {
+        $PARM_preamble .= "Spouse/Partner name like " . $spouse . ".</u>";
+        $prepare_params .= " AND customer_spouse LIKE '%" . $spouse . "%'";
+    }
+    if ($searchtype == "state") {
+        $PARM_preamble .= "State = " . $state . ".</u>";
+        $prepare_params .= " AND customer_state = '" . $state . "'";
+    }
+    if ($searchtype == "country") {
+        $PARM_preamble .= "Country = " . $country . ".</u>";
+        $prepare_params .= " AND customer_country = '" . $country . "'";
+    }
+
+    $prepare_params .= " ORDER BY customer_last_name ASC, customer_first_name ASC";
+
+    $objDB = new dentalfocus_db_function();
+    $resData = $objDB->dentalfocus_query($prepare_params);
+    $htmlCode = "<p style=\"text-align: center; font-size: 20px;\"> " . $PARM_preamble . "</u><br>Members who have asked not to be listed are excluded.<br>Specific fields which members have asked not be shown, will not be shown.</p>";
+    $htmlCode .= '<div style="margin: 0 auto; border: 4px solid sienna; padding:10px; width: 960px; background-color: white;">
+    <table style="border: 0 solid blue; border-collapse: collapse; width: 100%;">
+        <tbody>
+            <tr style="border-bottom: 1px solid blue;">
+                <th width="320px">Name (Last, First)<br>&nbsp;&nbsp;&nbsp;email address<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spouse/Partner name<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Collecting Interests</th>
+                <th width="320px">MAILING ADDRESS</th>
+                <th width="180px">Home Phone<br>&nbsp;&nbsp;&nbsp;Cell Phone<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chapter</th>
+            </tr>';
+    if(isset($resData) && !empty($resData)){
+        foreach ($resData as $keyData => $valueData){
+
+            $customer_last_name = isset($valueData['customer_last_name']) ? $valueData['customer_last_name'] : '';
+            $customer_first_name = isset($valueData['customer_first_name']) ? $valueData['customer_first_name'] : '';
+            $customer_email = isset($valueData['customer_email']) ? $valueData['customer_email'] : '';
+            $customer_address = isset($valueData['customer_address']) ? $valueData['customer_address'] : '';
+            $customer_city = isset($valueData['customer_city']) ? $valueData['customer_city'] : '';
+            $customer_state = isset($valueData['customer_state']) ? $valueData['customer_state'] : '';
+            $customer_zip = isset($valueData['customer_zip']) ? $valueData['customer_zip'] : '';
+            $customer_country = isset($valueData['customer_country']) ? $valueData['customer_country'] : '';
+            $customer_home_phone = isset($valueData['customer_home_phone']) ? $valueData['customer_home_phone'] : '';
+            $cell_phone = isset($valueData['cell_phone']) ? $valueData['cell_phone'] : '';
+            $chapter = isset($valueData['chapter']) ? $valueData['chapter'] : '';
+
+            if ($DBA == "yes") {
+                $customer_last_name = $valueData['member_no'] . "  " . $valueData['customer_last_name'];
+            }
+            else{
+                if ($valueData['No_list'] == "NSAT") {
+                    $customer_address = "--------------------------";
+                    $customer_city = "-------";
+                    $customer_state = "--";
+                    $customer_zip = "----------";
+                    $customer_country = "------";
+                    $customer_home_phone = "----------";
+                    $cell_phone = "----------";
+                }
+                if ($valueData['No_list'] == "NSA") {
+                    $customer_address = "---------------------------";
+                    $customer_city = "--------";
+                    $customer_state = "--";
+                    $customer_zip = "----------";
+                    $customer_country = "------";
+                }
+            }
+
+
+            $htmlCode .= '<tr>
+				<td style="vertical-align: top;">';
+            $htmlCode .= $customer_last_name;
+            $htmlCode .= ', ';
+            $htmlCode .= $customer_first_name;
+            $htmlCode .= '<br>';
+            $htmlCode .= $customer_email;
+            $htmlCode .= '<br></td>
+				<td style="vertical-align: top;">';
+            $htmlCode .= $customer_address;
+            $htmlCode .= '<br>';
+            $htmlCode .= $customer_city;
+            $htmlCode .= ', ';
+            $htmlCode .= $customer_state;
+            $htmlCode .= $customer_zip;
+            $htmlCode .= '<br>';
+            $htmlCode .= $customer_country;
+            $htmlCode .= '</td>
+				<td style="vertical-align: top;">';
+            $htmlCode .= $customer_home_phone;
+            $htmlCode .= '<br>';
+            $htmlCode .= $cell_phone;
+            $htmlCode .= '<br>';
+            $htmlCode .= $chapter;
+            $htmlCode .= '</td></tr>';
+        }
+    }
+    else{
+        $htmlCode .= "<tr><td colspan='4' style='text-align: center;'><a href='https://demo.stein-collectors.org/member-search/'>Return to SEARCH</tr>";
+    }
+
+	$htmlCode .= '</tbody></table></div>';
+    return $htmlCode;
+}
 
 /*function handle_registration_page(){
     ob_start();
@@ -187,7 +364,8 @@ add_action('init', 'ts_membership_form_handle_submission');
     }
 }*/
 
-function handle_registration_page() {
+function handle_registration_page()
+{
     ob_start();
 
     // Default error HTML block
@@ -287,7 +465,8 @@ function handle_registration_page() {
     return "<script>window.location.href='$redirect_url';</script>";
 }
 
-function handle_return_page() {
+function handle_return_page()
+{
     ob_start();
     $htmlCode = "<div style=\"margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;\"><table>
 <tbody>
@@ -321,52 +500,51 @@ function handle_return_page() {
                 'txn_id' => "'" . $_REQUEST['txn_id'] . "'"
             );
 
-            $resData = $objDB->dentalfocus_edit_records($df_social_table,$arrayEditData);
-            if(!$resData){
+            $resData = $objDB->dentalfocus_edit_records($df_social_table, $arrayEditData);
+            if (!$resData) {
                 $arrayInsertData = array(
-                    'memership_term'        => $term,
-                    'memership_country'     => $country,
-                    'print_or_digital' 	    => $print_or_digital,
-                    'membership' 	        => $membership,
-                    'paypal_payer_id' 	    => $_REQUEST['PayerID'],
-                    'paypal_st' 	        => $_REQUEST['st'],
-                    'paypal_tx' 	        => $_REQUEST['tx'],
-                    'paypal_cc' 	        => $_REQUEST['cc'],
-                    'paypal_amount' 	    => $_REQUEST['amt'],
-                    'payer_email' 	        => $_REQUEST['payer_email'],
-                    'payer_id' 	            => $_REQUEST['payer_id'],
-                    'payer_status' 	        => $_REQUEST['payer_status'],
-                    'first_name' 	        => $_REQUEST['first_name'],
-                    'last_name' 	        => $_REQUEST['last_name'],
-                    'address_name' 	        => $_REQUEST['address_name'],
-                    'address_street' 	    => $_REQUEST['address_street'],
-                    'address_city' 	        => $_REQUEST['address_city'],
-                    'address_state' 	    => $_REQUEST['address_state'],
-                    'address_country_code' 	=> $_REQUEST['address_country_code'],
-                    'address_zip' 	        => $_REQUEST['address_zip'],
-                    'residence_country' 	=> $_REQUEST['residence_country'],
-                    'txn_id' 	            => $_REQUEST['txn_id'],
-                    'mc_currency' 	        => $_REQUEST['mc_currency'],
-                    'mc_fee' 	            => $_REQUEST['mc_fee'],
-                    'mc_gross' 	            => $_REQUEST['mc_gross'],
-                    'protection_eligibility'=> $_REQUEST['protection_eligibility'],
-                    'payment_fee' 	        => $_REQUEST['payment_fee'],
-                    'payment_gross' 	    => $_REQUEST['payment_gross'],
-                    'payment_status' 	    => $_REQUEST['payment_status'],
-                    'payment_type' 	        => $_REQUEST['payment_type'],
-                    'handling_amount' 	    => $_REQUEST['handling_amount'],
-                    'shipping' 	            => $_REQUEST['shipping'],
-                    'item_name' 	        => $_REQUEST['item_name'],
-                    'quantity' 	            => $_REQUEST['quantity'],
-                    'txn_type' 	            => $_REQUEST['txn_type'],
-                    'payment_date' 	        => $_REQUEST['payment_date'],
-                    'receiver_id' 	        => $_REQUEST['receiver_id'],
-                    'notify_version' 	    => $_REQUEST['notify_version'],
-                    'verify_sign' 	        => $_REQUEST['verify_sign'],
+                    'memership_term' => $term,
+                    'memership_country' => $country,
+                    'print_or_digital' => $print_or_digital,
+                    'membership' => $membership,
+                    'paypal_payer_id' => $_REQUEST['PayerID'],
+                    'paypal_st' => $_REQUEST['st'],
+                    'paypal_tx' => $_REQUEST['tx'],
+                    'paypal_cc' => $_REQUEST['cc'],
+                    'paypal_amount' => $_REQUEST['amt'],
+                    'payer_email' => $_REQUEST['payer_email'],
+                    'payer_id' => $_REQUEST['payer_id'],
+                    'payer_status' => $_REQUEST['payer_status'],
+                    'first_name' => $_REQUEST['first_name'],
+                    'last_name' => $_REQUEST['last_name'],
+                    'address_name' => $_REQUEST['address_name'],
+                    'address_street' => $_REQUEST['address_street'],
+                    'address_city' => $_REQUEST['address_city'],
+                    'address_state' => $_REQUEST['address_state'],
+                    'address_country_code' => $_REQUEST['address_country_code'],
+                    'address_zip' => $_REQUEST['address_zip'],
+                    'residence_country' => $_REQUEST['residence_country'],
+                    'txn_id' => $_REQUEST['txn_id'],
+                    'mc_currency' => $_REQUEST['mc_currency'],
+                    'mc_fee' => $_REQUEST['mc_fee'],
+                    'mc_gross' => $_REQUEST['mc_gross'],
+                    'protection_eligibility' => $_REQUEST['protection_eligibility'],
+                    'payment_fee' => $_REQUEST['payment_fee'],
+                    'payment_gross' => $_REQUEST['payment_gross'],
+                    'payment_status' => $_REQUEST['payment_status'],
+                    'payment_type' => $_REQUEST['payment_type'],
+                    'handling_amount' => $_REQUEST['handling_amount'],
+                    'shipping' => $_REQUEST['shipping'],
+                    'item_name' => $_REQUEST['item_name'],
+                    'quantity' => $_REQUEST['quantity'],
+                    'txn_type' => $_REQUEST['txn_type'],
+                    'payment_date' => $_REQUEST['payment_date'],
+                    'receiver_id' => $_REQUEST['receiver_id'],
+                    'notify_version' => $_REQUEST['notify_version'],
+                    'verify_sign' => $_REQUEST['verify_sign'],
                 );
-                $recordID = $objDB->dentalfocus_insert_records($df_social_table,$arrayInsertData);
-            }
-            else{
+                $recordID = $objDB->dentalfocus_insert_records($df_social_table, $arrayInsertData);
+            } else {
                 $recordID = $resData['id'];
             }
             $arrayInsertData['id'] = $recordID;
@@ -421,8 +599,8 @@ function handle_return_page() {
     }
 </style>';
                     $htmlCodeReg .= '<div style="margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;">
-    <form id="new_registration" action="'.$registration_url.'" method="post" style="font-size: 1em;">
-        <input type="hidden" name="id" value="'.$recordID.'">
+    <form id="new_registration" action="' . $registration_url . '" method="post" style="font-size: 1em;">
+        <input type="hidden" name="id" value="' . $recordID . '">
         <fieldset
                 style="border: 4px solid sienna; margin: 0pt auto; padding: 5px; max-width: 800px; background-color: white;">
             <legend style="font-size: 2em; color: blue; margin-left: 30px;">Welcome&nbsp;to&nbsp;SCI</legend>
@@ -642,8 +820,7 @@ be for the subscriber.  Fields marked with * are required.</span><br>
 </div>';
                     echo $htmlCodeReg;
                     return ob_get_clean();
-                }
-                else{
+                } else {
                     $htmlCodeReg = '<style>
     input[type=text], input[type=url], input[type=email], input[type=password], input[type=tel] {
         -webkit-appearance: none;
@@ -687,8 +864,8 @@ be for the subscriber.  Fields marked with * are required.</span><br>
     }
 </style>';
                     $htmlCodeReg .= '<div style="margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;">
-    <form id="new_registration" action="'.$registration_url.'" method="post" style="font-size: 1em;">
-        <input type="hidden" name="id" value="'.$recordID.'">
+    <form id="new_registration" action="' . $registration_url . '" method="post" style="font-size: 1em;">
+        <input type="hidden" name="id" value="' . $recordID . '">
         <fieldset
                 style="border: 4px solid sienna; margin: 0pt auto; padding: 5px; max-width: 800px; background-color: white;">
             <legend style="font-size: 2em; color: blue; margin-left: 30px;">Welcome&nbsp;to&nbsp;SCI</legend>
@@ -858,8 +1035,7 @@ be for the subscriber.  Fields marked with * are required.</span><br>
                     echo $htmlCodeReg;
                     return ob_get_clean();
                 }
-            }
-            else{
+            } else {
                 $htmlCodeReg = '';
                 $htmlCodeReg .= '<div style="max-width: 800px; background-color: white; margin: 0 auto; border: solid 1px blue">
 <p style="overflow: auto; color: blue">
@@ -870,13 +1046,11 @@ be for the subscriber.  Fields marked with * are required.</span><br>
                 echo $htmlCodeReg;
                 return ob_get_clean();
             }
-        }
-        else{
+        } else {
             echo $htmlCode;
             return ob_get_clean();
         }
-    }
-    else{
+    } else {
         echo $htmlCode;
         return ob_get_clean();
     }
@@ -888,40 +1062,41 @@ function ts_membership_sortcode_scripts($hook)
     wp_enqueue_script('ts-membership-sortcode', TRENTIUM_CONTACT_FORM_PLUGIN_PATH . 'scripts/ts-membership-sortcode.js', array('jquery'), TRENTIUM_PLUGIN_VERSION, true, true);
 }
 
-function ts_membership_form_handle_submission() {
+function ts_membership_form_handle_submission()
+{
     if (isset($_REQUEST['submit_x']) && !empty($_REQUEST['submit_x'])) {
         $membership = NULL;
-        if(isset($_REQUEST['membership']) && !empty($_REQUEST['membership'])){
+        if (isset($_REQUEST['membership']) && !empty($_REQUEST['membership'])) {
             $membership = sanitize_text_field($_REQUEST['membership']);
         }
-        if(empty($membership)){
+        if (empty($membership)) {
             wp_redirect(add_query_arg('form_submitted', 'Please select membership option renew or new.', $_SERVER['REQUEST_URI']));
             exit;
         }
 
         $print_or_digital = NULL;
-        if(isset($_REQUEST['print_or_digital']) && !empty($_REQUEST['print_or_digital'])){
+        if (isset($_REQUEST['print_or_digital']) && !empty($_REQUEST['print_or_digital'])) {
             $print_or_digital = sanitize_text_field($_REQUEST['print_or_digital']);
         }
-        if(empty($print_or_digital)){
+        if (empty($print_or_digital)) {
             wp_redirect(add_query_arg('form_submitted', 'Please select print or digital option.', $_SERVER['REQUEST_URI']));
             exit;
         }
 
         $country = NULL;
-        if(isset($_REQUEST['country']) && !empty($_REQUEST['country'])){
+        if (isset($_REQUEST['country']) && !empty($_REQUEST['country'])) {
             $country = sanitize_text_field($_REQUEST['country']);
         }
-        if(empty($country)){
+        if (empty($country)) {
             wp_redirect(add_query_arg('form_submitted', 'Please select country option.', $_SERVER['REQUEST_URI']));
             exit;
         }
 
         $term = NULL;
-        if(isset($_REQUEST['term']) && !empty($_REQUEST['term'])){
+        if (isset($_REQUEST['term']) && !empty($_REQUEST['term'])) {
             $term = sanitize_text_field($_REQUEST['term']);
         }
-        if(empty($term)){
+        if (empty($term)) {
             wp_redirect(add_query_arg('form_submitted', 'Please select term option.', $_SERVER['REQUEST_URI']));
             exit;
         }
@@ -931,7 +1106,7 @@ function ts_membership_form_handle_submission() {
         $arrayEditData = array(
             'id' => intval($term)
         );
-        $resData = $objDB->dentalfocus_edit_records($df_social_table,$arrayEditData);
+        $resData = $objDB->dentalfocus_edit_records($df_social_table, $arrayEditData);
 
         $amount = "0";    // precaution against not being able to identify the transaction details
 
@@ -1059,18 +1234,18 @@ function ts_membership_sortcode($attrs)
                         </tr>
                     </thead>
                     <tbody>';
-    if(isset($resData) && !empty($resData)){
-        foreach($resData as $keyTerm => $valueTerm){
+    if (isset($resData) && !empty($resData)) {
+        foreach ($resData as $keyTerm => $valueTerm) {
             $class = "";
-            if($keyTerm == 1){
+            if ($keyTerm == 1) {
                 $class = "green-text";
             }
-        $htmlCode .= '<tr>
-                            <td class="'.$class.'">'.$valueTerm['memership_term'].'yr</td>
-                            <td class="'.$class.'">$'.$valueTerm['eprosit_digital'].'</td>
-                            <td class="'.$class.'">$'.$valueTerm['eprosit_print_usa'].'</td>
-                            <td class="'.$class.'">$'.$valueTerm['eprosit_print_ca_mx'].'</td>
-                            <td class="'.$class.'">$'.$valueTerm['eprosit_print_all'].'</td>
+            $htmlCode .= '<tr>
+                            <td class="' . $class . '">' . $valueTerm['memership_term'] . 'yr</td>
+                            <td class="' . $class . '">$' . $valueTerm['eprosit_digital'] . '</td>
+                            <td class="' . $class . '">$' . $valueTerm['eprosit_print_usa'] . '</td>
+                            <td class="' . $class . '">$' . $valueTerm['eprosit_print_ca_mx'] . '</td>
+                            <td class="' . $class . '">$' . $valueTerm['eprosit_print_all'] . '</td>
                         </tr>';
         }
     }
@@ -1081,11 +1256,11 @@ function ts_membership_sortcode($attrs)
     $htmlCode .= '<p>Options to pay by PayPal are available below. <span style="font-style: italic;">Please consider making your payment by check so we can avoid PayPal fees.</span> A downloadable subscription form is available by clicking <a style="font-weight: bold;" href="http://localhost/tsp/stein/wp-content/uploads/2024/11/pay-by-check_Rev20221002.pdf">HERE</a>.<br></p>';
 
 
-        if (isset($_GET['form_submitted']) && $_GET['form_submitted'] === 'true') {
-            $htmlCode .= '<p></p>';
-        }
+    if (isset($_GET['form_submitted']) && $_GET['form_submitted'] === 'true') {
+        $htmlCode .= '<p></p>';
+    }
 
-                $htmlCode .= '<form id="registration" action="" method="post" style="font-size: 1em;">
+    $htmlCode .= '<form id="registration" action="" method="post" style="font-size: 1em;">
                     <fieldset style="border: 2px solid blue; margin: 0pt auto; padding: 5px; max-width: 800px; background-color: white;">
                         <legend style="font-size: 24px; color: blue; margin-left: 30px;">Sign me up!</legend>
                         <table style="margin: 0pt auto; width: 100%; max-width: 600px;">
@@ -1126,18 +1301,18 @@ function ts_membership_sortcode($attrs)
                                 <td>
                                     <select name="term" id="term" style="min-width: 160px" required>
                                         <option value="">Select</option>';
-    if(isset($resData) && !empty($resData)) {
+    if (isset($resData) && !empty($resData)) {
         foreach ($resData as $keyTerm => $valueTerm) {
-            $htmlCode .= '<option value="'.$valueTerm['id'].'">'.$valueTerm['memership_term'].' year</option>';
+            $htmlCode .= '<option value="' . $valueTerm['id'] . '">' . $valueTerm['memership_term'] . ' year</option>';
         }
     }
 
-                          $htmlCode .= '</select>
+    $htmlCode .= '</select>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="text-align: right; font-weight: bold;">Credit card payments by PayPal are easy and secure.<br>Clicking the Pay Now button will whisk you away...</td>
-                                <td><input alt="PayPal - The safer, easier way to pay online!" name="submit" src="'.DENTALFOCUS_IMAGES.'PayPalPayNowButton.jpg" type="image"></td>
+                                <td><input alt="PayPal - The safer, easier way to pay online!" name="submit" src="' . DENTALFOCUS_IMAGES . 'PayPalPayNowButton.jpg" type="image"></td>
                             </tr>
                             </tbody>
                         </table>
