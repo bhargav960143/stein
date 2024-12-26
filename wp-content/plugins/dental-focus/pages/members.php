@@ -2,9 +2,6 @@
 if (isset($_REQUEST['action']) && !empty($_REQUEST['action'])) {
     $pageAction = $_REQUEST['action'];
     switch ($pageAction) {
-        case "add":
-            dentalfocus_add_members();
-            break;
         case "save":
             dentalfocus_save_members();
             break;
@@ -22,6 +19,12 @@ if (isset($_REQUEST['action']) && !empty($_REQUEST['action'])) {
             break;
         case "export":
             dentalfocus_export_members();
+            break;
+        case "add-mmt":
+            dentalfocus_mmt_members();
+            break;
+        case "add-mmt-sci":
+            dentalfocus_mmt_sci_members();
             break;
         default:
             trentium_membership_members();
@@ -44,9 +47,9 @@ function trentium_membership_members()
     <div id="pageparentdiv" class="postbox">
     <h3 class="hndle ui-sortable-handle inside">
         SCI Membership Members List &nbsp;
-        <a href="admin.php?page=tssettings&tab=members&action=add" class="button button-primary button-medium">Manually
+        <a href="admin.php?page=tssettings&tab=members&action=add-mmt" class="button button-primary button-medium">Manually
             create a new Member registration in the MMT.</a>
-        <a href="admin.php?page=tssettings&tab=members&action=add" class="button button-primary button-medium">Manually
+        <a href="admin.php?page=tssettings&tab=members&action=add-mmt-sci" class="button button-primary button-medium">Manually
             create a new User in the WP-User Table (with SCI number).</a>
         <a href="admin-post.php?action=export_members_df" class="button button-primary button-medium">Export
             Master Membership Table (MMT) to CSV file.</a>
@@ -120,49 +123,6 @@ function trentium_membership_members()
         </table>
     </div>
     </div><?php
-}
-
-/*
-    Create Function for add social media
-*/
-function dentalfocus_add_members()
-{
-
-    ?>
-    <script type="text/javascript">
-        jQuery(document).ready(function ($) {
-            $("#form-socialmedia").validationEngine();
-        });
-    </script>
-    <div id="pageparentdiv" class="postbox">
-        <h3 class="hndle ui-sortable-handle inside">
-            Add SCI Membership Price Settings &nbsp;
-            <a href="admin.php?page=tssettings&tab=socialmedia" style="float:right;"
-               class="button button-primary button-medium">Back</a>
-        </h3>
-        <div class="inside"><?php
-            dentalfocus_messagedisplay();
-            ?>
-            <form name="form-socialmedia" id="form-socialmedia" method="post"
-                  action="admin.php?page=tssettings&tab=socialmedia&action=save">
-                <p>
-                <table width="70%">
-                    <tr>
-                        <td><label><strong>Title :</strong></label></td>
-                        <td><input type="text" name="txtTitle" id="txtTitle" class="validate[required]"/></td>
-                        <td><label><strong>URL :</strong></label></td>
-                        <td><input type="text" name="txtUrl" id="txtUrl" class="validate[required,custom[url]]"/></td>
-                        <td align="right">
-                            <input type="submit" name="addsocialmedia" id="addsocialmedia" class="button"
-                                   value="Add Membership Settings">
-                        </td>
-                    </tr>
-                </table>
-                </p>
-            </form>
-        </div>
-    </div><?php
-
 }
 
 /*
@@ -595,25 +555,6 @@ function dentalfocus_delete_members()
 */
 function dentalfocus_view_members()
 {
-    $df_social_table = 'trentium_membership_users';
-    $df_social_table1 = 'trentium_membership_payments';
-    if (!isset($_REQUEST['member_no']) || empty($_REQUEST['member_no'])) {
-        wp_redirect("admin.php?page=tssettings&tab=members&msg=imn");
-        exit;
-    }
-    $socialmedia_id = $_REQUEST['member_no'];
-    $arrayEditData = array(
-        'member_no' => intval($socialmedia_id)
-    );
-    $objDB = new dentalfocus_db_function();
-    $resData = $objDB->dentalfocus_edit_records($df_social_table, $arrayEditData);
-    $resDataPayment = NULL;
-    if (isset($resData['last_payment_id']) && !empty($resData['last_payment_id'])) {
-        $arrayEditData1 = array(
-            'id' => $resData['last_payment_id']
-        );
-        $resDataPayment = $objDB->dentalfocus_edit_records($df_social_table1, $arrayEditData1);
-    }
     ?>
     <script type="text/javascript">
         jQuery(document).ready(function ($) {
@@ -622,366 +563,30 @@ function dentalfocus_view_members()
     </script>
     <div id="pageparentdiv" class="postbox">
         <h3 class="hndle ui-sortable-handle inside">
-            View SCI Member Details
-            (<?php echo $resData['customer_last_name'] . ' ' . $resData['customer_first_name'] ?>)
-            <a href="admin.php?page=tssettings&tab=members" style="float:right;"
+            Add SCI Membership Price Settings &nbsp;
+            <a href="admin.php?page=tssettings&tab=socialmedia" style="float:right;"
                class="button button-primary button-medium">Back</a>
         </h3>
         <div class="inside"><?php
             dentalfocus_messagedisplay();
             ?>
-            <p>
-            <table width="100%">
-                <tr>
-                    <td><label><strong>Member Number:</strong></label></td>
-                    <td style="float: left"><strong
-                                style="color: dodgerblue"><?php echo $resData['member_no']; ?></strong></td>
-
-                    <td><label><strong>Last Name:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['customer_last_name']; ?></td>
-
-                    <td><label><strong>First Name:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['customer_first_name']; ?></td>
-                </tr>
-                <tr>
-                    <td><label><strong>Address:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['customer_address']; ?></td>
-
-                    <td><label><strong>City:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['customer_city']; ?></td>
-
-                    <td><label><strong>State:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['customer_state']; ?></td>
-                </tr>
-                <tr>
-                    <td><label><strong>Zip:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['customer_zip']; ?></td>
-
-                    <td><label><strong>Country:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['customer_country']; ?></td>
-
-                    <td><label><strong>&nbsp;</strong></label></td>
-                    <td style="float: left">&nbsp;</td>
-                </tr>
-                <tr>
-                    <td colspan="6">
-                        <hr>
-                    </td>
-                </tr>
-                <tr>
-                    <td><label><strong>Email:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['customer_email']; ?></td>
-
-                    <td><label><strong>Spouse:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['customer_spouse']; ?></td>
-
-                    <td><label><strong>&nbsp;</strong></label></td>
-                    <td style="float: left">&nbsp;</td>
-                </tr>
-                <tr>
-                    <td><label><strong>Home Phone:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['customer_home_phone']; ?></td>
-
-                    <td><label><strong>Cell Phone:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['cell_phone']; ?></td>
-
-                    <td><label><strong>Print/Digital:</strong></label></td>
-                    <td style="float: left">
-                        <?php echo $resDataPayment['print_or_digital']; ?>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="6">
-                        <hr>
-                    </td>
-                </tr>
-                <tr>
-                    <td><label><strong>SCI Chapter:</strong></label></td>
-                    <td style="float: left">
-                        <?php echo $resData['chapter']; ?>
-                    </td>
-
-                    <td><label><strong>Address 2:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['local_chapter_officer']; ?></td>
-
-                    <td><label><strong>Master Steinologist:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['master_steinologist']; ?></td>
-                </tr>
-                <tr>
-                    <td><label><strong>First Year:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['FirstYear']; ?></td>
-
-                    <td><label><strong>Paid Until:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['paid_until']; ?></td>
-
-                    <td><label><strong>Date Paid:</strong></label></td>
-                    <td style="float: left"><?php echo $resData['paid_qtr']; ?></td>
-                </tr>
-                <tr>
-                    <td><label><strong>Referred By:</strong></label></td>
-                    <td style="float: left">
-                        <?php echo $resData['referred_by']; ?>
-                    </td>
-
-                    <td><label><strong>No List:</strong></label></td>
-                    <td style="float: left">
-                        <?php echo $resData['No_list']; ?>
-                    </td>
-
-                    <td><label><strong>Pmt Terms:</strong></label></td>
-                    <td style="float: left">
-                        <?php echo $resData['SubCode']; ?>
-                    </td>
-                </tr>
-                <tr>
-                    <td><label><strong>Collecting Interests:</strong></label></td>
-                    <td style="float: left">
-                        <?php echo $resData['collecting_interests']; ?>
-                    </td>
-
-                    <td><label><strong>Notes:</strong></label></td>
-                    <td style="float: left">
-                        <?php echo $resData['Notes']; ?>
-                    </td>
-
-                    <td><label><strong>Mbr Status:</strong></label></td>
-                    <td style="float: left">
-                        <?php
-                        if ($resData['PastMember'] == 0) {
-                            echo 'Current';
-                        } else {
-                            echo 'Past';
-                        }
-                        ?>
-                    </td>
-                </tr>
-                <?php
-                if (isset($resDataPayment) && !empty($resDataPayment)) {
-                    ?>
+            <form name="form-socialmedia" id="form-socialmedia" method="post"
+                  action="admin.php?page=tssettings&tab=socialmedia&action=save">
+                <p>
+                <table width="70%">
                     <tr>
-                        <td colspan="6">
-                            <hr>
+                        <td><label><strong>Title :</strong></label></td>
+                        <td><input type="text" name="txtTitle" id="txtTitle" class="validate[required]"/></td>
+                        <td><label><strong>URL :</strong></label></td>
+                        <td><input type="text" name="txtUrl" id="txtUrl" class="validate[required,custom[url]]"/></td>
+                        <td align="right">
+                            <input type="submit" name="addsocialmedia" id="addsocialmedia" class="button"
+                                   value="Add Membership Settings">
                         </td>
                     </tr>
-                    <tr>
-                        <td colspan="6">
-                            <h2>Payment Details</h2>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label><strong>Memership Term:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['memership_term']; ?> Yr
-                        </td>
-
-                        <td><label><strong>Memership Country:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['memership_country']; ?>
-                        </td>
-
-                        <td><label><strong>Print/Digital:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['print_or_digital']; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label><strong>Memership Type:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['membership']; ?>
-                        </td>
-
-                        <td><label><strong>Paypal Payer ID:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['paypal_payer_id']; ?>
-                        </td>
-
-                        <td><label><strong>Paypal ST:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['paypal_st']; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label><strong>Paypal TX:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['paypal_tx']; ?>
-                        </td>
-
-                        <td><label><strong>Paypal CC:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['paypal_cc']; ?>
-                        </td>
-
-                        <td><label><strong>Paypal Amount:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['paypal_amount']; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label><strong>Payer Email:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['payer_email']; ?>
-                        </td>
-
-                        <td><label><strong>Payer ID:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['payer_id']; ?>
-                        </td>
-
-                        <td><label><strong>Payment Status:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['payer_status']; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label><strong>First Name:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['first_name']; ?>
-                        </td>
-
-                        <td><label><strong>Last Name:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['last_name']; ?>
-                        </td>
-
-                        <td><label><strong>Address:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['address_name']; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label><strong>Street:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['address_street']; ?>
-                        </td>
-
-                        <td><label><strong>City:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['address_city']; ?>
-                        </td>
-
-                        <td><label><strong>State:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['address_state']; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label><strong>Country Code:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['address_country_code']; ?>
-                        </td>
-
-                        <td><label><strong>Zip:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['address_zip']; ?>
-                        </td>
-
-                        <td><label><strong>Residence Country:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['residence_country']; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label><strong>TXN ID:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['txn_id']; ?>
-                        </td>
-
-                        <td><label><strong>MC Currency:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['mc_currency']; ?>
-                        </td>
-
-                        <td><label><strong>MC Fee:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['mc_fee']; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label><strong>MC GROSS:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['mc_gross']; ?>
-                        </td>
-
-                        <td><label><strong>Protection Eligibility:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['protection_eligibility']; ?>
-                        </td>
-
-                        <td><label><strong>Payment Fee:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['payment_fee']; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label><strong>Payment Gross:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['payment_gross']; ?>
-                        </td>
-
-                        <td><label><strong>Payment Status:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['payment_status']; ?>
-                        </td>
-
-                        <td><label><strong>Payment Type:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['payment_type']; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label><strong>Handling Amount:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['handling_amount']; ?>
-                        </td>
-
-                        <td><label><strong>Shipping:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['shipping']; ?>
-                        </td>
-
-                        <td><label><strong>Item Name:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['item_name']; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label><strong>Quantity:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['quantity']; ?>
-                        </td>
-
-                        <td><label><strong>Txn Type:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['txn_type']; ?>
-                        </td>
-
-                        <td><label><strong>Payment Date:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['payment_date']; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label><strong>Receiver ID:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['receiver_id']; ?>
-                        </td>
-
-                        <td><label><strong>Notify Version:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['notify_version']; ?>
-                        </td>
-
-                        <td><label><strong>Verify Sign:</strong></label></td>
-                        <td style="float: left">
-                            <?php echo $resDataPayment['verify_sign']; ?>
-                        </td>
-                    </tr>
-                    <?php
-                }
-                ?>
-
-            </table>
-            </p>
+                </table>
+                </p>
+            </form>
         </div>
     </div><?php
 }
@@ -1063,4 +668,198 @@ function dentalfocus_view_members()
         exit;
     }
 }*/
+
+function dentalfocus_mmt_members(){
+    ?><script type="text/javascript">
+        jQuery(document).ready(function ($) {
+            $("#form-socialmedia").validationEngine();
+        });
+    </script>
+    <div id="pageparentdiv" class="postbox">
+        <h3 class="hndle ui-sortable-handle inside">
+            Add SCI Member Details
+            <a href="admin.php?page=tssettings&tab=members" style="float:right;"
+               class="button button-primary button-medium">Back</a>
+        </h3>
+        <div class="inside"><?php
+            dentalfocus_messagedisplay();
+            ?>
+            <form name="form-socialmedia" id="form-socialmedia" method="post"
+                  action="admin.php?page=tssettings&tab=members&action=update">
+                <p>
+                <table width="100%">
+                    <tr>
+                        <td><label><strong>Member Number:</strong></label></td>
+                        <td style="float: left">Auto generate based on system.</td>
+
+                        <td><label><strong>Last Name:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_last_name" id="customer_last_name"></td>
+
+                        <td><label><strong>First Name:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_first_name" id="customer_first_name"></td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>Address:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_address" id="customer_address"></td>
+
+                        <td><label><strong>City:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_city" id="customer_city"></td>
+
+                        <td><label><strong>State:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_state" id="customer_state"></td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>Zip:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_zip" id="customer_zip"></td>
+
+                        <td><label><strong>Country:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_country" id="customer_country"></td>
+
+                        <td><label><strong>&nbsp;</strong></label></td>
+                        <td style="float: left">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="6">
+                            <hr>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>Email:</strong></label></td>
+                        <td style="float: left"><input type="text" disabled readonly name="customer_email"
+                                                       id="customer_email"></td>
+
+                        <td><label><strong>Spouse:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_spouse" id="customer_spouse"></td>
+
+                        <td><label><strong>&nbsp;</strong></label></td>
+                        <td style="float: left">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>Home Phone:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_home_phone" id="customer_home_phone"></td>
+
+                        <td><label><strong>Cell Phone:</strong></label></td>
+                        <td style="float: left"><input type="text" name="cell_phone" id="cell_phone"></td>
+
+                        <td><label><strong>Print/Digital:</strong></label></td>
+                        <td style="float: left">
+                            <select name="print_or_digital" id="print_or_digital" required>
+                                <option value="">Select</option>
+                                <option value="Prosit">Prosit
+                                </option>
+                                <option value="eProsit">eProsit
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="6">
+                            <hr>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>SCI Chapter:</strong></label></td>
+                        <td style="float: left">
+                            <select name="chapter" id="chapter">
+                                <option value="">Select</option>
+                                <option value="THIRSTY KNIGHTS"  >THIRSTY KNIGHTS</option>
+                                <option value="DIE KRUGSAMMLER e. V." >DIE KRUGSAMMLER e. V.</option>
+                                <option value="MEISTER STEINERS" >MEISTER STEINERS</option>
+                                <option value="SUN STEINERS" >SUN STEINERS</option>
+                                <option value="UPPER MIDWEST STEINOLOGISTS" >UPPER MIDWEST STEINOLOGISTS</option>
+                                <option value="PITTSBURGH STEIN SOCIETY" >PITTSBURGH STEIN SOCIETY</option>
+                                <option value="PACIFIC STEIN SAMMLER" selected="selected">PACIFIC STEIN SAMMLER</option>
+                                <option value="DIE LUSTIGEN STEINJAEGER" >DIE LUSTIGEN STEINJAEGER</option>
+                                <option value="GAMBRINUS STEIN CLUB" >GAMBRINUS STEIN CLUB</option>
+                                <option value="PENNSYLVANIA KEYSTEINERS" >PENNSYLVANIA KEYSTEINERS</option>
+                                <option value="DIE GOLDEN GATE ZECHER" >DIE GOLDEN GATE ZECHER</option>
+                                <option value="LONE STAR CHAPTER" >LONE STAR CHAPTER</option>
+                                <option value="ERSTE GRUPPE" >ERSTE GRUPPE</option>
+                                <option value="ROCKY MOUNTAIN STEINERS" >ROCKY MOUNTAIN STEINERS</option>
+                                <option value="ALTE GERMANEN" >ALTE GERMANEN</option>
+                                <option value="NEW ENGLAND STEINERS" >NEW ENGLAND STEINERS</option>
+                                <option value="CAROLINA STEINERS" >CAROLINA STEINERS</option>
+                                <option value="ARIZONA STEIN COLLECTORS" >ARIZONA STEIN COLLECTORS</option>
+                                <option value="UPPERSTEINERS OF N.Y. STATE" >UPPERSTEINERS OF N.Y. STATE</option>
+                                <option value="BAYOU STEIN VEREIN" >BAYOU STEIN VEREIN</option>
+                                <option value="SAINT LOUIS GATEWAY STEINERS" >SAINT LOUIS GATEWAY STEINERS</option>
+                                <option value="DIE STUDENTEN PRINZ GRUPPE" >DIE STUDENTEN PRINZ GRUPPE</option>
+                                <option value="DIXIE STEINERS" >DIXIE STEINERS</option>
+                                <option value="THOROUGHBRED STEIN VEREIN" >THOROUGHBRED STEIN VEREIN</option>
+                                <option value="MICHISTEINERS" >MICHISTEINERS</option>
+                                <option value="THIRSTY KNIGHTS/NEW ENGLAND STEINERS" >THIRSTY KNIGHTS/NEW ENGLAND STEINERS</option>
+                                <option value="BURGERMEISTERS" >BURGERMEISTERS</option>
+                            </select>
+                        </td>
+
+                        <td><label><strong>Address 2:</strong></label></td>
+                        <td style="float: left"><input type="text" name="local_chapter_officer"
+                                                       id="local_chapter_officer"></td>
+
+                        <td><label><strong>Master Steinologist:</strong></label></td>
+                        <td style="float: left"><input type="text" name="master_steinologist" id="master_steinologist"></td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>First Year:</strong></label></td>
+                        <td style="float: left"><input name="FirstYear" id="FirstYear" type="text"></td>
+
+                        <td><label><strong>Paid Until:</strong></label></td>
+                        <td style="float: left"><input name="paid_until" id="paid_until" type="text"></td>
+
+                        <td><label><strong>Date Paid:</strong></label></td>
+                        <td style="float: left"><input name="paid_qtr" id="paid_qtr" type="text"></td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>Referred By:</strong></label></td>
+                        <td style="float: left">
+                            <input name="referred_by" id="referred_by" type="text">
+                        </td>
+
+                        <td><label><strong>No List:</strong></label></td>
+                        <td style="float: left">
+                            <input name="No_list" id="No_list" type="text">
+                        </td>
+
+                        <td><label><strong>Pmt Terms:</strong></label></td>
+                        <td style="float: left">
+                            <input name="SubCode" id="SubCode" type="text">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>Collecting Interests:</strong></label></td>
+                        <td style="float: left">
+                            <textarea name="collecting_interests"
+                                      id="collecting_interests"></textarea>
+                        </td>
+
+                        <td><label><strong>Notes:</strong></label></td>
+                        <td style="float: left">
+                            <textarea name="Notes" id="Notes"></textarea>
+                        </td>
+
+                        <td><label><strong>Mbr Status:</strong></label></td>
+                        <td style="float: left">
+                            <select name="PastMember" id="PastMember">
+                                <option value="">Select</option>
+                                <option value="0" >Current
+                                </option>
+                                <option value="1">Past
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="left"><input type="submit" name="editmember" id="editmember" class="button"
+                                                value="Update SCI Member Details"></td>
+                    </tr>
+                </table>
+                </p>
+            </form>
+        </div>
+    </div><?php
+}
+
+function dentalfocus_mmt_sci_members(){
+
+}
 ?>
