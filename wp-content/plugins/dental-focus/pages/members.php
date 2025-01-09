@@ -130,21 +130,101 @@ function trentium_membership_members()
 */
 function dentalfocus_save_members()
 {
-    if (isset($_REQUEST['addsocialmedia']) && !empty($_REQUEST['addsocialmedia'])) {
-        $df_social_table = 'trentium_membership_settings';
-        $title = $_REQUEST['txtTitle'];
-        $url = $_REQUEST['txtUrl'];
-        $arrayInsertData = array(
-            'title' => htmlspecialchars($title),
-            'slug' => sanitize_title($title),
-            'url' => $url
-        );
+    if (isset($_REQUEST['editmember']) && !empty($_REQUEST['editmember'])) {
+        $df_social_table_settings = 'trentium_membership_settings';
+        $df_social_table = 'trentium_membership_payments';
+        $user_table = 'trentium_membership_users';
         $objDB = new dentalfocus_db_function();
-        $objDB->dentalfocus_insert_records($df_social_table, $arrayInsertData);
-        wp_redirect("admin.php?page=tssettings&tab=socialmedia&msg=rsi");
-        exit;
+        $arrayEditData = array(
+            'id' => intval($_REQUEST['print_or_digital_term'])
+        );
+        $resData = $objDB->dentalfocus_edit_records($df_social_table_settings, $arrayEditData);
+
+        if(isset($resData) && !empty($resData)){
+            if($_REQUEST['form_type'] == "sci-mmt"){
+                $password = NULL;
+            }
+            else{
+                $password = isset($_REQUEST['password']) ? wp_hash_password($_REQUEST['password']) : null;
+            }
+            $arrayInsertData = array(
+                'memership_term' => intval($_REQUEST['print_or_digital_term']),
+                'memership_country' => $_REQUEST['print_or_digital_country'],
+                'print_or_digital' => $_REQUEST['print_or_digital'],
+                'membership' => 'New',
+                'first_name' => $_REQUEST['customer_first_name'],
+                'last_name' => $_REQUEST['customer_last_name'],
+                'address_name' => $_REQUEST['customer_address'],
+                'address_city' => $_REQUEST['customer_city'],
+                'address_state' => $_REQUEST['customer_state'],
+                'address_zip' => $_REQUEST['customer_zip'],
+                'residence_country' => $_REQUEST['customer_country']
+            );
+            $recordID = $objDB->dentalfocus_insert_records($df_social_table, $arrayInsertData,true);
+            if($recordID){
+                $insert_data = [
+                    'last_payment_id' => $recordID,
+                    'username' => $_REQUEST['username'],
+                    'password' => $password,
+                    'customer_first_name' => strtoupper(sanitize_text_field($_REQUEST['customer_first_name'])),
+                    'customer_last_name' => strtoupper(sanitize_text_field($_REQUEST['customer_last_name'])),
+                    'customer_address' => strtoupper(sanitize_text_field($_REQUEST['customer_address'])),
+                    'customer_city' => strtoupper(sanitize_text_field($_REQUEST['customer_city'])),
+                    'customer_state' => strtoupper(sanitize_text_field($_REQUEST['customer_state'])),
+                    'customer_zip' => strtoupper(sanitize_text_field($_REQUEST['customer_zip'])),
+                    'customer_country' => strtoupper(sanitize_text_field($_REQUEST['customer_country'])),
+                    'customer_email' => sanitize_email($_REQUEST['customer_email']),
+                    'customer_spouse' => sanitize_text_field($_REQUEST['customer_spouse']),
+                    'company' => sanitize_text_field($_REQUEST['company']),
+                    'customer_home_phone' => sanitize_text_field($_REQUEST['customer_home_phone']),
+                    'cell_phone' => sanitize_text_field($_REQUEST['cell_phone']),
+                    'Office_phone' => sanitize_text_field($_REQUEST['Office_phone']),
+                    'chapter' => sanitize_text_field($_REQUEST['chapter']),
+                    'local_chapter_officer' => sanitize_text_field($_REQUEST['local_chapter_officer']),
+                    'master_steinologist' => sanitize_text_field($_REQUEST['master_steinologist']),
+                    'FirstYear' => sanitize_text_field($_REQUEST['FirstYear']),
+                    'paid_until' => sanitize_text_field($_REQUEST['paid_until']),
+                    'paid_qtr' => sanitize_text_field($_REQUEST['paid_qtr']),
+                    'referred_by' => sanitize_text_field($_REQUEST['referred_by']),
+                    'No_list' => sanitize_text_field($_REQUEST['No_list']),
+                    'SubCode' => sanitize_text_field($_REQUEST['SubCode']),
+                    'collecting_interests' => sanitize_text_field($_REQUEST['collecting_interests']),
+                    'Notes' => sanitize_text_field($_REQUEST['Notes']),
+                    'PastMember' => sanitize_text_field($_REQUEST['PastMember']),
+                ];
+
+                $insert_result = $objDB->dentalfocus_insert_records($user_table, $insert_data,true);
+
+                if ($insert_result) {
+                    if($_REQUEST['form_type'] != "sci-mmt"){
+                        $user_data = array(
+                            'user_pass' => $_REQUEST['password'],
+                            'user_login' => $_REQUEST['username'],
+                            'display_name' => $_REQUEST['username'],
+                            'first_name' => strtoupper(sanitize_text_field($_REQUEST['customer_first_name'])),
+                            'last_name' => strtoupper(sanitize_text_field($_REQUEST['customer_last_name'])),
+                            'user_email' => sanitize_email($_REQUEST['customer_email'])
+                        );
+
+                        //increments member number
+                        wp_insert_user( $user_data ) ;
+                    }
+
+                    wp_redirect("admin.php?page=tssettings&tab=members&action=add&msg=rsi");
+                    exit;
+                }
+            }
+            else{
+                wp_redirect("admin.php?page=tssettings&tab=members&action=add&msg=swr");
+                exit;
+            }
+        }
+        else{
+            wp_redirect("admin.php?page=tssettings&tab=members&action=add&msg=swr");
+            exit;
+        }
     } else {
-        wp_redirect("admin.php?page=tssettings&tab=socialmedia&action=add&msg=swr");
+        wp_redirect("admin.php?page=tssettings&tab=members&action=add&msg=swr");
         exit;
     }
 }
@@ -555,6 +635,25 @@ function dentalfocus_delete_members()
 */
 function dentalfocus_view_members()
 {
+    $df_social_table = 'trentium_membership_users';
+    $df_social_table1 = 'trentium_membership_payments';
+    if (!isset($_REQUEST['member_no']) || empty($_REQUEST['member_no'])) {
+        wp_redirect("admin.php?page=tssettings&tab=members&msg=imn");
+        exit;
+    }
+    $socialmedia_id = $_REQUEST['member_no'];
+    $arrayEditData = array(
+        'member_no' => intval($socialmedia_id)
+    );
+    $objDB = new dentalfocus_db_function();
+    $resData = $objDB->dentalfocus_edit_records($df_social_table, $arrayEditData);
+    $resDataPayment = NULL;
+    if (isset($resData['last_payment_id']) && !empty($resData['last_payment_id'])) {
+        $arrayEditData1 = array(
+            'id' => $resData['last_payment_id']
+        );
+        $resDataPayment = $objDB->dentalfocus_edit_records($df_social_table1, $arrayEditData1);
+    }
     ?>
     <script type="text/javascript">
         jQuery(document).ready(function ($) {
@@ -563,30 +662,175 @@ function dentalfocus_view_members()
     </script>
     <div id="pageparentdiv" class="postbox">
         <h3 class="hndle ui-sortable-handle inside">
-            Add SCI Membership Price Settings &nbsp;
-            <a href="admin.php?page=tssettings&tab=socialmedia" style="float:right;"
+            View SCI Member Details
+            <a href="admin.php?page=tssettings&tab=members" style="float:right;"
                class="button button-primary button-medium">Back</a>
         </h3>
         <div class="inside"><?php
             dentalfocus_messagedisplay();
             ?>
-            <form name="form-socialmedia" id="form-socialmedia" method="post"
-                  action="admin.php?page=tssettings&tab=socialmedia&action=save">
-                <p>
-                <table width="70%">
-                    <tr>
-                        <td><label><strong>Title :</strong></label></td>
-                        <td><input type="text" name="txtTitle" id="txtTitle" class="validate[required]"/></td>
-                        <td><label><strong>URL :</strong></label></td>
-                        <td><input type="text" name="txtUrl" id="txtUrl" class="validate[required,custom[url]]"/></td>
-                        <td align="right">
-                            <input type="submit" name="addsocialmedia" id="addsocialmedia" class="button"
-                                   value="Add Membership Settings">
-                        </td>
-                    </tr>
-                </table>
-                </p>
-            </form>
+            <div class="row">
+                <h1>Member Details:</h1>
+                <h2 style="color: dodgerblue"><?php echo $resData['customer_last_name'] . ' ' . $resData['customer_first_name']; ?></h2>
+            </div>
+            <table width="100%">
+                <tr>
+                    <td><label><strong>Member Number:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['member_no']; ?></td>
+
+                    <td><label><strong>Last Name:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['customer_last_name']; ?></td>
+
+                    <td><label><strong>First Name:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['customer_first_name']; ?></td>
+                </tr>
+                <tr>
+                    <td><label><strong>Address:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['customer_address']; ?></td>
+
+                    <td><label><strong>City:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['customer_city']; ?></td>
+
+                    <td><label><strong>State:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['customer_state']; ?></td>
+                </tr>
+                <tr>
+                    <td><label><strong>Zip:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['customer_zip']; ?></td>
+
+                    <td><label><strong>Country:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['customer_country']; ?></td>
+
+                    <td><label><strong>&nbsp;</strong></label></td>
+                    <td style="float: left">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <hr>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label><strong>Email:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['customer_email']; ?></td>
+
+                    <td><label><strong>Spouse:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['customer_spouse']; ?></td>
+
+                    <td><label><strong>Company:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['company']; ?></td>
+                </tr>
+                <tr>
+                    <td><label><strong>Home Phone:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['customer_home_phone']; ?></td>
+
+                    <td><label><strong>Cell Phone:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['cell_phone']; ?></td>
+
+                    <td><label><strong>Office Phone:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['Office_phone']; ?></td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <hr>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label><strong>Is this a print subscription or eProsit (digital only)?</strong></label></td>
+                    <td style="float: left">
+                        <?php echo $resDataPayment['print_or_digital']; ?>
+                    </td>
+
+                    <td><label><strong>Where do you live?</strong></label></td>
+                    <td style="float: left">
+                        <?php echo $resDataPayment['memership_country']; ?>
+                    </td>
+
+                    <td><label><strong>Subscription Term?</strong></label></td>
+                    <td style="float: left">
+                        <?php echo $resDataPayment['memership_term']; ?> Year
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <hr>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label><strong>Paypal Payer ID</strong></label></td>
+                    <td style="float: left">
+                        <?php echo $resDataPayment['paypal_payer_id']; ?>
+                    </td>
+
+                    <td><label><strong>Paypal Amount</strong></label></td>
+                    <td style="float: left">
+                        <?php echo $resDataPayment['paypal_amount']; ?>
+                    </td>
+
+                    <td><label><strong>Paypal Email</strong></label></td>
+                    <td style="float: left">
+                        <?php echo $resDataPayment['payer_email']; ?> Year
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <hr>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label><strong>SCI Chapter:</strong></label></td>
+                    <td style="float: left">
+                        <?php echo $resData['chapter']; ?>
+                    </td>
+
+                    <td><label><strong>Address 2:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['local_chapter_officer']; ?></td>
+
+                    <td><label><strong>Master Steinologist:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['master_steinologist']; ?></td>
+                </tr>
+                <tr>
+                    <td><label><strong>First Year:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['FirstYear']; ?></td>
+
+                    <td><label><strong>Paid Until:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['paid_until']; ?></td>
+
+                    <td><label><strong>Date Paid:</strong></label></td>
+                    <td style="float: left"><?php echo $resData['paid_qtr']; ?></td>
+                </tr>
+                <tr>
+                    <td><label><strong>Referred By:</strong></label></td>
+                    <td style="float: left">
+                        <?php echo $resData['referred_by']; ?>
+                    </td>
+
+                    <td><label><strong>No List:</strong></label></td>
+                    <td style="float: left">
+                        <?php echo $resData['No_list']; ?>
+                    </td>
+
+                    <td><label><strong>Pmt Terms:</strong></label></td>
+                    <td style="float: left">
+                        <?php echo $resData['SubCode']; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label><strong>Collecting Interests:</strong></label></td>
+                    <td style="float: left">
+                        <?php echo $resData['collecting_interests']; ?>
+                    </td>
+
+                    <td><label><strong>Notes:</strong></label></td>
+                    <td style="float: left">
+                        <?php echo $resData['Notes']; ?>
+                    </td>
+
+                    <td><label><strong>Mbr Status:</strong></label></td>
+                    <td style="float: left">
+                        <?php echo $resData['PastMember']; ?>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div><?php
 }
@@ -670,6 +914,10 @@ function dentalfocus_view_members()
 }*/
 
 function dentalfocus_mmt_members(){
+    $df_social_table_settings = 'trentium_membership_settings';
+    $objDB = new dentalfocus_db_function();
+    $resData = $objDB->dentalfocus_select_all_records($df_social_table_settings);
+
     ?><script type="text/javascript">
         jQuery(document).ready(function ($) {
             $("#form-socialmedia").validationEngine();
@@ -685,18 +933,29 @@ function dentalfocus_mmt_members(){
             dentalfocus_messagedisplay();
             ?>
             <form name="form-socialmedia" id="form-socialmedia" method="post"
-                  action="admin.php?page=tssettings&tab=members&action=update">
+                  action="admin.php?page=tssettings&tab=members&action=save">
+                <input type="hidden" name="form_type" value="mmt">
                 <p>
                 <table width="100%">
                     <tr>
                         <td><label><strong>Member Number:</strong></label></td>
                         <td style="float: left">Auto generate based on system.</td>
 
+                        <td><label><strong>Username:</strong></label></td>
+                        <td style="float: left"><input type="text" name="username" id="username"></td>
+
+                        <td><label><strong>Password:</strong></label></td>
+                        <td style="float: left"><input type="password" name="password" id="password"></td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>First Name:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_first_name" id="customer_first_name"></td>
+
                         <td><label><strong>Last Name:</strong></label></td>
                         <td style="float: left"><input type="text" name="customer_last_name" id="customer_last_name"></td>
 
-                        <td><label><strong>First Name:</strong></label></td>
-                        <td style="float: left"><input type="text" name="customer_first_name" id="customer_first_name"></td>
+                        <td><label><strong>&nbsp;</strong></label></td>
+                        <td style="float: left">&nbsp;</td>
                     </tr>
                     <tr>
                         <td><label><strong>Address:</strong></label></td>
@@ -725,14 +984,14 @@ function dentalfocus_mmt_members(){
                     </tr>
                     <tr>
                         <td><label><strong>Email:</strong></label></td>
-                        <td style="float: left"><input type="text" disabled readonly name="customer_email"
+                        <td style="float: left"><input type="text" name="customer_email"
                                                        id="customer_email"></td>
 
                         <td><label><strong>Spouse:</strong></label></td>
                         <td style="float: left"><input type="text" name="customer_spouse" id="customer_spouse"></td>
 
-                        <td><label><strong>&nbsp;</strong></label></td>
-                        <td style="float: left">&nbsp;</td>
+                        <td><label><strong>Company:</strong></label></td>
+                        <td style="float: left"><input type="text" name="company" id="company"></td>
                     </tr>
                     <tr>
                         <td><label><strong>Home Phone:</strong></label></td>
@@ -741,14 +1000,44 @@ function dentalfocus_mmt_members(){
                         <td><label><strong>Cell Phone:</strong></label></td>
                         <td style="float: left"><input type="text" name="cell_phone" id="cell_phone"></td>
 
-                        <td><label><strong>Print/Digital:</strong></label></td>
+                        <td><label><strong>Office Phone:</strong></label></td>
+                        <td style="float: left"><input type="text" name="Office_phone" id="Office_phone"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="6">
+                            <hr>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>Is this a print subscription or eProsit (digital only)?</strong></label></td>
                         <td style="float: left">
                             <select name="print_or_digital" id="print_or_digital" required>
                                 <option value="">Select</option>
-                                <option value="Prosit">Prosit
-                                </option>
-                                <option value="eProsit">eProsit
-                                </option>
+                                <option value="Prosit">Print</option>
+                                <option value="eProsit">Digital</option>
+                            </select>
+                        </td>
+
+                        <td><label><strong>Where do you live?</strong></label></td>
+                        <td style="float: left">
+                            <select name="print_or_digital_country" id="print_or_digital_country" required>
+                                <option value="">Select</option>
+                                <option value="US">US</option>
+                                <option value="C/M">Canada/Mexico</option>
+                                <option value="Eur">Other Worldwide</option>
+                            </select>
+                        </td>
+
+                        <td><label><strong>Subscription Term?</strong></label></td>
+                        <td style="float: left">
+                            <select name="print_or_digital_term" id="print_or_digital_term" required>
+                                <option value="">Select</option><?php
+                                if (count($resData) > 0) {
+                                    foreach ($resData as $r) {
+                                        ?><option value="<?php echo $r['id'] ?>"><?php echo $r['memership_term'] ?> Year</option><?php
+                                    }
+                                }
+                                ?>
                             </select>
                         </td>
                     </tr>
@@ -850,7 +1139,7 @@ function dentalfocus_mmt_members(){
                     </tr>
                     <tr>
                         <td align="left"><input type="submit" name="editmember" id="editmember" class="button"
-                                                value="Update SCI Member Details"></td>
+                                                value="Save SCI Member Details"></td>
                     </tr>
                 </table>
                 </p>
@@ -860,6 +1149,237 @@ function dentalfocus_mmt_members(){
 }
 
 function dentalfocus_mmt_sci_members(){
+    $df_social_table_settings = 'trentium_membership_settings';
+    $objDB = new dentalfocus_db_function();
+    $resData = $objDB->dentalfocus_select_all_records($df_social_table_settings);
 
+    ?><script type="text/javascript">
+        jQuery(document).ready(function ($) {
+            $("#form-socialmedia").validationEngine();
+        });
+    </script>
+    <div id="pageparentdiv" class="postbox">
+        <h3 class="hndle ui-sortable-handle inside">
+            Add SCI Member Details
+            <a href="admin.php?page=tssettings&tab=members" style="float:right;"
+               class="button button-primary button-medium">Back</a>
+        </h3>
+        <div class="inside"><?php
+            dentalfocus_messagedisplay();
+            ?>
+            <form name="form-socialmedia" id="form-socialmedia" method="post"
+                  action="admin.php?page=tssettings&tab=members&action=save">
+                <input type="hidden" name="form_type" value="sci-mmt">
+                <p>
+                <table width="100%">
+                    <tr>
+                        <td><label><strong>Member Number:</strong></label></td>
+                        <td style="float: left">Auto generate based on system.</td>
+
+                        <td><label><strong>Username:</strong></label></td>
+                        <td style="float: left"><input type="text" name="username" id="username"></td>
+
+                        <td><label><strong>&nbsp;</strong></label></td>
+                        <td style="float: left">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>First Name:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_first_name" id="customer_first_name"></td>
+
+                        <td><label><strong>Last Name:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_last_name" id="customer_last_name"></td>
+
+                        <td><label><strong>&nbsp;</strong></label></td>
+                        <td style="float: left">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>Address:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_address" id="customer_address"></td>
+
+                        <td><label><strong>City:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_city" id="customer_city"></td>
+
+                        <td><label><strong>State:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_state" id="customer_state"></td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>Zip:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_zip" id="customer_zip"></td>
+
+                        <td><label><strong>Country:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_country" id="customer_country"></td>
+
+                        <td><label><strong>&nbsp;</strong></label></td>
+                        <td style="float: left">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="6">
+                            <hr>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>Email:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_email"
+                                                       id="customer_email"></td>
+
+                        <td><label><strong>Spouse:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_spouse" id="customer_spouse"></td>
+
+                        <td><label><strong>Company:</strong></label></td>
+                        <td style="float: left"><input type="text" name="company" id="company"></td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>Home Phone:</strong></label></td>
+                        <td style="float: left"><input type="text" name="customer_home_phone" id="customer_home_phone"></td>
+
+                        <td><label><strong>Cell Phone:</strong></label></td>
+                        <td style="float: left"><input type="text" name="cell_phone" id="cell_phone"></td>
+
+                        <td><label><strong>Office Phone:</strong></label></td>
+                        <td style="float: left"><input type="text" name="Office_phone" id="Office_phone"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="6">
+                            <hr>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>Is this a print subscription or eProsit (digital only)?</strong></label></td>
+                        <td style="float: left">
+                            <select name="print_or_digital" id="print_or_digital" required>
+                                <option value="">Select</option>
+                                <option value="Prosit">Print</option>
+                                <option value="eProsit">Digital</option>
+                            </select>
+                        </td>
+
+                        <td><label><strong>Where do you live?</strong></label></td>
+                        <td style="float: left">
+                            <select name="print_or_digital_country" id="print_or_digital_country" required>
+                                <option value="">Select</option>
+                                <option value="US">US</option>
+                                <option value="C/M">Canada/Mexico</option>
+                                <option value="Eur">Other Worldwide</option>
+                            </select>
+                        </td>
+
+                        <td><label><strong>Subscription Term?</strong></label></td>
+                        <td style="float: left">
+                            <select name="print_or_digital_term" id="print_or_digital_term" required>
+                                <option value="">Select</option><?php
+                                if (count($resData) > 0) {
+                                    foreach ($resData as $r) {
+                                        ?><option value="<?php echo $r['id'] ?>"><?php echo $r['memership_term'] ?> Year</option><?php
+                                    }
+                                }
+                                ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="6">
+                            <hr>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>SCI Chapter:</strong></label></td>
+                        <td style="float: left">
+                            <select name="chapter" id="chapter">
+                                <option value="">Select</option>
+                                <option value="THIRSTY KNIGHTS"  >THIRSTY KNIGHTS</option>
+                                <option value="DIE KRUGSAMMLER e. V." >DIE KRUGSAMMLER e. V.</option>
+                                <option value="MEISTER STEINERS" >MEISTER STEINERS</option>
+                                <option value="SUN STEINERS" >SUN STEINERS</option>
+                                <option value="UPPER MIDWEST STEINOLOGISTS" >UPPER MIDWEST STEINOLOGISTS</option>
+                                <option value="PITTSBURGH STEIN SOCIETY" >PITTSBURGH STEIN SOCIETY</option>
+                                <option value="PACIFIC STEIN SAMMLER" selected="selected">PACIFIC STEIN SAMMLER</option>
+                                <option value="DIE LUSTIGEN STEINJAEGER" >DIE LUSTIGEN STEINJAEGER</option>
+                                <option value="GAMBRINUS STEIN CLUB" >GAMBRINUS STEIN CLUB</option>
+                                <option value="PENNSYLVANIA KEYSTEINERS" >PENNSYLVANIA KEYSTEINERS</option>
+                                <option value="DIE GOLDEN GATE ZECHER" >DIE GOLDEN GATE ZECHER</option>
+                                <option value="LONE STAR CHAPTER" >LONE STAR CHAPTER</option>
+                                <option value="ERSTE GRUPPE" >ERSTE GRUPPE</option>
+                                <option value="ROCKY MOUNTAIN STEINERS" >ROCKY MOUNTAIN STEINERS</option>
+                                <option value="ALTE GERMANEN" >ALTE GERMANEN</option>
+                                <option value="NEW ENGLAND STEINERS" >NEW ENGLAND STEINERS</option>
+                                <option value="CAROLINA STEINERS" >CAROLINA STEINERS</option>
+                                <option value="ARIZONA STEIN COLLECTORS" >ARIZONA STEIN COLLECTORS</option>
+                                <option value="UPPERSTEINERS OF N.Y. STATE" >UPPERSTEINERS OF N.Y. STATE</option>
+                                <option value="BAYOU STEIN VEREIN" >BAYOU STEIN VEREIN</option>
+                                <option value="SAINT LOUIS GATEWAY STEINERS" >SAINT LOUIS GATEWAY STEINERS</option>
+                                <option value="DIE STUDENTEN PRINZ GRUPPE" >DIE STUDENTEN PRINZ GRUPPE</option>
+                                <option value="DIXIE STEINERS" >DIXIE STEINERS</option>
+                                <option value="THOROUGHBRED STEIN VEREIN" >THOROUGHBRED STEIN VEREIN</option>
+                                <option value="MICHISTEINERS" >MICHISTEINERS</option>
+                                <option value="THIRSTY KNIGHTS/NEW ENGLAND STEINERS" >THIRSTY KNIGHTS/NEW ENGLAND STEINERS</option>
+                                <option value="BURGERMEISTERS" >BURGERMEISTERS</option>
+                            </select>
+                        </td>
+
+                        <td><label><strong>Address 2:</strong></label></td>
+                        <td style="float: left"><input type="text" name="local_chapter_officer"
+                                                       id="local_chapter_officer"></td>
+
+                        <td><label><strong>Master Steinologist:</strong></label></td>
+                        <td style="float: left"><input type="text" name="master_steinologist" id="master_steinologist"></td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>First Year:</strong></label></td>
+                        <td style="float: left"><input name="FirstYear" id="FirstYear" type="text"></td>
+
+                        <td><label><strong>Paid Until:</strong></label></td>
+                        <td style="float: left"><input name="paid_until" id="paid_until" type="text"></td>
+
+                        <td><label><strong>Date Paid:</strong></label></td>
+                        <td style="float: left"><input name="paid_qtr" id="paid_qtr" type="text"></td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>Referred By:</strong></label></td>
+                        <td style="float: left">
+                            <input name="referred_by" id="referred_by" type="text">
+                        </td>
+
+                        <td><label><strong>No List:</strong></label></td>
+                        <td style="float: left">
+                            <input name="No_list" id="No_list" type="text">
+                        </td>
+
+                        <td><label><strong>Pmt Terms:</strong></label></td>
+                        <td style="float: left">
+                            <input name="SubCode" id="SubCode" type="text">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label><strong>Collecting Interests:</strong></label></td>
+                        <td style="float: left">
+                            <textarea name="collecting_interests"
+                                      id="collecting_interests"></textarea>
+                        </td>
+
+                        <td><label><strong>Notes:</strong></label></td>
+                        <td style="float: left">
+                            <textarea name="Notes" id="Notes"></textarea>
+                        </td>
+
+                        <td><label><strong>Mbr Status:</strong></label></td>
+                        <td style="float: left">
+                            <select name="PastMember" id="PastMember">
+                                <option value="">Select</option>
+                                <option value="0" >Current
+                                </option>
+                                <option value="1">Past
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="left"><input type="submit" name="editmember" id="editmember" class="button"
+                                                value="Save SCI Member Details"></td>
+                    </tr>
+                </table>
+                </p>
+            </form>
+        </div>
+    </div><?php
 }
 ?>

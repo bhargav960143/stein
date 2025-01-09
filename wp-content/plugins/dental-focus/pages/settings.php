@@ -6,7 +6,7 @@ if(isset($_REQUEST['tab']) && !empty($_REQUEST['tab'])){
 ?><div id="wpbody" role="main">
     <div class="wrap">
         <div id="message2" class="updated notice below-h2">
-            <h3>SCI Membership Price Settings</h3>
+            <h3>SCI Membership Settings</h3>
         </div>
         <!-- Content -->
         <div class="wp-filter">
