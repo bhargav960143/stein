@@ -193,7 +193,7 @@ WHERE
     $htmlCode = "<div style=\"margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;\"><table>
 <tbody>
 <tr>
-<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"http://localhost/tsp/stein/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
+<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
 <td>There are issue with your registration, You can email us on <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a> 
 
 <a href=\"http://stein-collectors.org/\">Click here </a>to return to the home page of Stein Collectors International.</td>
@@ -218,7 +218,7 @@ WHERE
                 $htmlCodeError = "<div style=\"margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;\"><table>
 <tbody>
 <tr>
-<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"http://localhost/tsp/stein/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
+<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
 <td>Username already used, please try with different one. Or You can connect with us on <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a> 
 
 <a href=\"http://stein-collectors.org/\">Click here </a>to return to the home page of Stein Collectors International.</td>
@@ -237,7 +237,7 @@ WHERE
                 $htmlCodeError = "<div style=\"margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;\"><table>
 <tbody>
 <tr>
-<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"http://localhost/tsp/stein/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
+<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
 <td>User already created for payment, You can connect with us on <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a> 
 
 <a href=\"http://stein-collectors.org/\">Click here </a>to return to the home page of Stein Collectors International.</td>
@@ -325,7 +325,7 @@ WHERE
                             $htmlCodeError = "<div style=\"margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;\"><table>
 <tbody>
 <tr>
-<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"http://localhost/tsp/stein/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
+<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
 <td>Oops Not able to create new user, You can connect with us on <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a> 
 
 <a href=\"http://stein-collectors.org/\">Click here </a>to return to the home page of Stein Collectors International.</td>
@@ -336,17 +336,17 @@ WHERE
                             return ob_get_clean();
                         }
                         else{
-                            wp_redirect('http://localhost/tsp/stein/new-member-registration-confirmation/');
+                            wp_redirect('https://demo.stein-collectors.org/new-member-registration-confirmation/');
                             exit;
                         }
                     }
                     else{
-                        wp_redirect('http://localhost/tsp/stein/new-member-registration-confirmation/');
+                        wp_redirect('https://demo.stein-collectors.org/new-member-registration-confirmation/');
                         return ob_get_clean();
                     }
                 }
                 else{
-                    wp_redirect('http://localhost/tsp/stein/new-member-registration-confirmation/');
+                    wp_redirect('https://demo.stein-collectors.org/new-member-registration-confirmation/');
                     return ob_get_clean();
                 }
 
@@ -377,7 +377,7 @@ function handle_registration_page()
             <tbody>
                 <tr>
                     <td width=\"100\">
-                        <img class=\"alignnone size-full wp-image-1647\" src=\"http://localhost/tsp/stein/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" />
+                        <img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" />
                     </td>
                     <td>
                         There are issues with your registration. Please contact us at 
@@ -477,7 +477,7 @@ function ts_convention_registration_form_handle_submission()
             <tbody>
                 <tr>
                     <td width=\"100\">
-                        <img class=\"alignnone size-full wp-image-1647\" src=\"http://localhost/tsp/stein/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" />
+                        <img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" />
                     </td>
                     <td>
                         There are issues with your registration. Please contact us at 
@@ -952,7 +952,7 @@ function handle_return_page()
     $htmlCode = "<div style=\"margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;\"><table>
 <tbody>
 <tr>
-<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"http://localhost/tsp/stein/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
+<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
 <td>There are issue with payment, You can email us on <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a> 
 
 <a href=\"http://stein-collectors.org/\">Click here </a>to return to the home page of Stein Collectors International.</td>
@@ -1090,7 +1090,7 @@ function handle_return_page()
                 <tr>
                     <td colspan="2">
                         <p style="text-align: justify;"><img
-                                src="http://localhost/tsp/stein/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg"
+                                src="https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg"
                                 alt="" align="left" hspace="10"><span style="color: blue;">Before we can
 start your
 subscription we need your mailing address, and we hope you will provide
@@ -1355,7 +1355,7 @@ be for the subscriber.  Fields marked with * are required.</span><br>
                 <tr>
                     <td colspan="2">
                         <p style="text-align: justify;"><img
-                                src="http://localhost/tsp/stein/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg"
+                                src="https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg"
                                 alt="" align="left" hspace="10"><span style="color: blue;">Before we can
 start your
 subscription we need your mailing address, and we hope you will provide
@@ -1520,7 +1520,7 @@ be for the subscriber.  Fields marked with * are required.</span><br>
                 $htmlCodeReg = '';
                 $htmlCodeReg .= '<div style="max-width: 800px; background-color: white; margin: 0 auto; border: solid 1px blue">
 <p style="overflow: auto; color: blue">
-<img style="width: 85px; height: 116px; float: left; margin: 10px;" src="http://localhost/tsp/stein/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg">
+<img style="width: 85px; height: 116px; float: left; margin: 10px;" src="https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg">
 <br><br>Thanks for renewing! <a href="http://localhost/tsp/stein">Click here</a> to return to the SCI website.</p>
 
 </div>';
@@ -1543,7 +1543,7 @@ function handle_convention_return_page()
     $htmlCode = "<div style=\"margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;\"><table>
 <tbody>
 <tr>
-<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"http://localhost/tsp/stein/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
+<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
 <td>There are issue with payment, You can email us on <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a> 
 
 <a href=\"http://stein-collectors.org/\">Click here </a>to return to the home page of SCI Convention Registration.</td>
@@ -1654,7 +1654,7 @@ function handle_convention_return_page()
                 $recordID = $objDB->dentalfocus_insert_records($df_social_table, $arrayInsertData, true);
 
                 if (!$recordID) {
-                    wp_redirect('http://localhost/tsp/stein/convention-payment-received/');
+                    wp_redirect('https://demo.stein-collectors.org/convention-payment-received/');
                     exit;
                 }
                 else{
@@ -1872,7 +1872,7 @@ function ts_membership_sortcode($attrs)
     $htmlCode .= '</tbody>
                 </table>';
 
-    $htmlCode .= '<p>Options to pay by PayPal are available below. <span style="font-style: italic;">Please consider making your payment by check so we can avoid PayPal fees.</span> A downloadable subscription form is available by clicking <a style="font-weight: bold;" href="http://localhost/tsp/stein/wp-content/uploads/2024/11/pay-by-check_Rev20221002.pdf">HERE</a>.<br></p>';
+    $htmlCode .= '<p>Options to pay by PayPal are available below. <span style="font-style: italic;">Please consider making your payment by check so we can avoid PayPal fees.</span> A downloadable subscription form is available by clicking <a style="font-weight: bold;" href="https://demo.stein-collectors.org/wp-content/uploads/2024/11/pay-by-check_Rev20221002.pdf">HERE</a>.<br></p>';
 
 
     if (isset($_GET['form_submitted']) && $_GET['form_submitted'] === 'true') {
