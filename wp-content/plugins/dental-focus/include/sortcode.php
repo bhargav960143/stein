@@ -920,8 +920,6 @@ function ts_convention_registration_form_handle_submission()
 
     $itemName = 'SCI Convention Deposit:' . $memberName;
 
-    $_REQUEST['amountToPay'] = 1;
-
     $custom_data = json_encode(array(
         'id' => intval($insert_result),
         'amount_to_pay' => $_REQUEST['amountToPay'],
@@ -1785,7 +1783,6 @@ function ts_membership_form_handle_submission()
             'print_or_digital' => $print_or_digital,      // Example: Pass mode
             'membership' => $membership,      // Example: Pass mode
         ));
-        $amount = 1;
         // Redirect to avoid resubmission on refresh
         $paypal_url = add_query_arg(
             array(
