@@ -20,6 +20,9 @@ if(isset($_REQUEST['tab']) && !empty($_REQUEST['tab'])){
                 <li class="plugin-install-recommended"><a href="admin.php?page=tssettings&tab=members" class="
 				<?php if(!empty($tabName)){ if($tabName == "members"){ echo 'current'; } } ?>">Members</a>
                 </li>
+                <li class="plugin-install-recommended"><a href="admin.php?page=tssettings&tab=convention" class="
+				<?php if(!empty($tabName)){ if($tabName == "convention"){ echo 'current'; } } ?>">Convention Payment</a>
+                </li>
                 <!--<li class="plugin-install-favorites"><a href="admin.php?page=tssettings&tab=favorites" class="
 				<?php /*if(!empty($tabName)){ if($tabName == "favorites"){ echo 'current'; } } */?>">Favourites</a>
                 </li>-->
@@ -31,6 +34,9 @@ if(isset($_REQUEST['tab']) && !empty($_REQUEST['tab'])){
                 break;
             case "payment":
                 include 'payment.php';
+                break;
+            case "convention":
+                include 'convention.php';
                 break;
             case "members":
                 include 'members.php';

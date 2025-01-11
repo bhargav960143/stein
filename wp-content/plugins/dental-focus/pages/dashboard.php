@@ -13,17 +13,19 @@
                         <h4><a href="<?php echo DENTALFOCUS_WP_ADMIN_URL; ?>admin.php?page=tssettings">SCI Membership Price Settings</a></h4>
                     </div>
                     <div class="desc column-description" style="margin-right:0px;">
-                        <p>You can manage SCI Membership Price, find help section of each module, manage display option.</p>
-                        <p>
-                            <a class="install-now button" href="<?php echo DENTALFOCUS_WP_ADMIN_URL; ?>admin.php?page=tssettings">Settings</a>&nbsp;&nbsp;
-                            <a class="install-now button" href="<?php echo DENTALFOCUS_WP_ADMIN_URL; ?>admin.php?page=tssettings&tab=payment">Payment</a>&nbsp;&nbsp;
+                        <p>You can manage SCI Membership Price</p>
+                        <br>
+                        <br>
+                        <br>
+                        <div>
+                            <a class="install-now button" href="<?php echo DENTALFOCUS_WP_ADMIN_URL; ?>admin.php?page=tssettings">Term Settings</a>&nbsp;&nbsp;
+                            <a class="install-now button" href="<?php echo DENTALFOCUS_WP_ADMIN_URL; ?>admin.php?page=tssettings&tab=payment">Membership Payment</a>&nbsp;&nbsp;
                             <a class="install-now button" href="<?php echo DENTALFOCUS_WP_ADMIN_URL; ?>admin.php?page=tssettings&tab=members">Members</a>
-                        </p>
+                            <a class="install-now button" href="<?php echo DENTALFOCUS_WP_ADMIN_URL; ?>admin.php?page=tssettings&tab=convention">Convention Payment</a>
+                        </div>
                     </div>
                 </div>
             </div>
-
-
 
             <div class="plugin-card plugin-card-testimonials" style="display: none">
                 <div class="plugin-card-top">
