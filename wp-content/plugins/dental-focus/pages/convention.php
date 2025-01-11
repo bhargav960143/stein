@@ -37,18 +37,13 @@ function trentium_membership_convention_payments()
             <thead>
             <tr>
                 <th><strong>Sr No</strong></th>
-                <th><strong>Term</strong></th>
-                <th><strong>Country</strong></th>
-                <th><strong>Print/Digital</strong></th>
-                <th><strong>Membership</strong></th>
-                <th><strong>Payer ID</strong></th>
-                <th><strong>Transaction ID</strong></th>
-                <th><strong>Amount</strong></th>
-                <th><strong>Email</strong></th>
-                <th><strong>First Name</strong></th>
-                <th><strong>Last Name</strong></th>
-                <th><strong>Status</strong></th>
+                <th><strong>Member Name</strong></th>
+                <th><strong>Member Email</strong></th>
+                <th><strong>Member Phone</strong></th>
+                <th><strong>Grand Total</strong></th>
+                <th><strong>Paid</strong></th>
                 <th><strong>Date</strong></th>
+                <th style="text-align:center;"><strong>Action</strong></th>
             </tr>
             </thead>
             <tbody>
@@ -61,7 +56,7 @@ function trentium_membership_convention_payments()
             /*
                 dentalfocus_select_all_records : Function name for get all records from table : trentium_membership_payments
             */
-            $resData = $objDB->dentalfocus_select_all_records('trentium_membership_payments');
+            $resData = $objDB->dentalfocus_con_all_records('trentium_con_payments');
             /*
                 Check records exists or not.
                 IF no then display No Record Found Message.
@@ -76,18 +71,16 @@ function trentium_membership_convention_payments()
                     ?>
                     <tr>
                     <td><?php echo ++$i; ?></td>
-                    <td><?php echo $r['memership_term']; ?> Yr</td>
-                    <td><?php echo $r['memership_country']; ?></td>
-                    <td><?php echo $r['print_or_digital']; ?></td>
-                    <td><?php echo $r['membership']; ?></td>
-                    <td><?php echo $r['paypal_payer_id']; ?></td>
-                    <td><?php echo $r['paypal_tx']; ?></td>
-                    <td>$<?php echo $r['paypal_amount']; ?></td>
-                    <td><?php echo $r['payer_email']; ?></td>
-                    <td><?php echo $r['first_name']; ?></td>
-                    <td><?php echo $r['last_name']; ?></td>
-                    <td><?php echo $r['payment_status']; ?></td>
-                    <td><?php echo $r['payment_date']; ?></td>
+                    <td><?php echo $r['member_name']; ?></td>
+                    <td><?php echo $r['member_email']; ?></td>
+                    <td><?php echo $r['member_phone']; ?></td>
+                    <td>$<?php echo $r['grand_total']; ?></td>
+                    <td><?php if(!empty($r['paypal_payer_id'])){ echo 'Yes'; } else{ echo 'No'; } ?></td>
+                    <td><?php echo $r['created_at']; ?></td>
+                    <td style="text-align:center;">
+                        <a class="button button-secondary"
+                           href="admin.php?page=tssettings&tab=convention&action=viewinfo&id=<?php echo $r['id']; ?>">View</a>
+                    </td>
                     </tr><?php
                 }
 
@@ -129,28 +122,338 @@ function dentalfocus_delete_convention_payments()
 */
 function dentalfocus_view_convention_payments()
 {
+    $df_social_table = 'trentium_convention';
+    if(!isset($_REQUEST['id']) || empty($_REQUEST['id'])){
+        wp_redirect("admin.php?page=tssettings&tab=convention&msg=swr");
+        exit;
+    }
+    $socialmedia_id = $_REQUEST['id'];
+    $arrayEditData = array(
+        'id' => intval($socialmedia_id)
+    );
+    $objDB = new dentalfocus_db_function();
+    $resData = $objDB->dentalfocus_edit_records($df_social_table,$arrayEditData);
+
+
+
+    $df_social_table = 'trentium_convention';
+    $df_social_table1 = 'trentium_con_payments';
+    if (!isset($_REQUEST['id']) || empty($_REQUEST['id'])) {
+        wp_redirect("admin.php?page=tssettings&tab=convention&msg=imn");
+        exit;
+    }
+    $socialmedia_id = $_REQUEST['id'];
+    $arrayEditData = array(
+        'id' => intval($socialmedia_id)
+    );
+    $objDB = new dentalfocus_db_function();
+    $resData = $objDB->dentalfocus_edit_records($df_social_table, $arrayEditData);
+    $resDataPayment = NULL;
+    if (isset($resData['id']) && !empty($resData['id'])) {
+        $arrayEditData1 = array(
+            'con_id' => $resData['id']
+        );
+        $resDataPayment = $objDB->dentalfocus_edit_records($df_social_table1, $arrayEditData1);
+    }
     ?>
-    <div class="wrap">
-        <div id="pageparentdiv" class="postbox">
-            <h3 class="hndle ui-sortable-handle inside">
-                How to use membership sortcode?
-                <a href="admin.php?page=tssettings&tab=socialmedia" style="float:right;"
-                   class="button button-primary button-medium">Back</a>
-            </h3>
-            <div class="inside">
-                <div id="message2" class="updated notice below-h2">
-                    <h2>How to use?</h2>
-                    <br/>
-                    <p>
-                        If you want to display membership form, you can use our sortcode directly.<br/><br/>
-                        How to use in template?<br/><br/>
-                        <strong><code>&lt;?php echo do_shortcode("[ts-membership]");
-                                ?&gt;&nbsp;</code></strong><br/><br/>
-                        How to use wordpress page?<br/><br/>
-                        <strong><code>[ts_membership]</code></strong>
-                    </p>
-                </div>
+    <script type="text/javascript">
+        jQuery(document).ready(function ($) {
+            $("#form-socialmedia").validationEngine();
+        });
+    </script>
+    <div id="pageparentdiv" class="postbox">
+        <h3 class="hndle ui-sortable-handle inside">
+            View SCI Convention Payment Details
+            <a href="admin.php?page=tssettings&tab=convention" style="float:right;"
+               class="button button-primary button-medium">Back</a>
+        </h3>
+        <div class="inside"><?php
+            dentalfocus_messagedisplay();
+            ?>
+            <div class="row">
+                <h1>Member Details:</h1>
+                <h2 style="color: dodgerblue"><?php echo $resData['member_name']; ?></h2>
             </div>
+            <table width="100%" border="1px" cellspacing="0" cellpadding="6">
+                <tr>
+                    <th colspan="2">LIST ATTENDEES</th>
+                    <th>First timer?</th>
+                    <th>Preferred names for badges</th>
+                </tr>
+                <tr>
+                    <td>
+                        <label><strong>MEMBER</strong> name</label>
+                    </td>
+                    <td>
+                        <?php echo $resData['member_name']; ?>
+                    </td>
+                    <td style="text-script: center">
+                        <?php echo $resData['first_member']; ?>
+                    </td>
+                    <td style="text-script: center">
+                        <?php echo $resData['member_badge']; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label><strong>Spouse/Partner</strong></label>
+                    </td>
+                    <td>
+                        <?php echo $resData['spouse_name']; ?>
+                    </td>
+                    <td style="text-script: center">
+                        <?php echo $resData['first_spouse']; ?>
+                    </td>
+                    <td style="text-script: center">
+                        <?php echo $resData['spouse_badge']; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label><strong>Guest 1</strong></label>
+                    </td>
+                    <td>
+                        <?php echo $resData['guest1_name']; ?>
+                    </td>
+                    <td style="text-script: center">
+                        <?php echo $resData['first_guest1']; ?>
+                    </td>
+                    <td style="text-script: center">
+                        <?php echo $resData['guest1_badge']; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label><strong>Guest 2</strong></label>
+                    </td>
+                    <td>
+                        <?php echo $resData['guest2_name']; ?>
+                    </td>
+                    <td style="text-script: center">
+                        <?php echo $resData['first_guest2']; ?>
+                    </td>
+                    <td style="text-script: center">
+                        <?php echo $resData['guest2_badge']; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label><strong>Special needs?</strong></label>
+                    </td>
+                    <td colspan="3">
+                        <?php echo $resData['special_needs']; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <hr>
+                    </td>
+                </tr>
+                <tr>
+                    <th colspan="4">MEMBER'S CONTACT INFORMATION</th>
+                </tr>
+                <tr>
+                    <td>
+                        <label><strong>Mailing address</strong></label><br>
+                        <label><strong>address line 1</strong> <?php echo $resData['address_line1']; ?></label><br>
+                        <label><strong>address line 2</strong> <?php echo $resData['address_line2']; ?></label><br>
+                        <label><strong>address line 3</strong> <?php echo $resData['address_line3']; ?></label><br>
+                        <label><strong>address line 4</strong> <?php echo $resData['address_line4']; ?></label><br>
+                    </td>
+                    <td colspan="3">
+                        <table width="100%" cellpadding="5" border="1" cellspacing="0">
+                            <tr>
+                                <td><label><strong>SCI Nbr:</strong> </label></td>
+                                <td><?php echo $resData['member_nbr']; ?></td>
+                            </tr>
+                            <tr>
+                                <td><label><strong>phone:</strong> </label></td>
+                                <td><?php echo $resData['member_phone']; ?></td>
+                            </tr>
+                            <tr>
+                                <td><label><strong>cell:</strong> </label></td>
+                                <td><?php echo $resData['member_cell']; ?></td>
+                            </tr>
+                            <tr>
+                                <td><label><strong>email:</strong> </label></td>
+                                <td><?php echo $resData['member_email']; ?></td>
+                            </tr>
+                            <tr>
+                                <td><label><strong>chapter:</strong> </label></td>
+                                <td><?php echo $resData['chapter_select']; ?></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <hr>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <hr>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">REGISTRATION FEES</td>
+                </tr>
+                <tr>
+                    <td>
+                        &nbsp;
+                    </td>
+                    <td>Amount</td>
+                    <td>Qty</td>
+                    <td>Amount</td>
+                </tr>
+
+
+
+
+
+
+                <tr>
+                    <td >
+                        Single - Includes one convention stein =================================================>
+                    </td>
+                    <td>$<?php echo $resData['price_single']; ?></td>
+                    <td><?php echo $resData['qty_single']; ?></td>
+                    <td>$<?php echo $resData['total_single']; ?></td>
+                </tr>
+                <tr>
+                    <td >
+                        Couple - Includes one convention stein ================================================>
+                    </td>
+                    <td>$<?php echo $resData['price_couple']; ?></td>
+                    <td><?php echo $resData['qty_couple']; ?></td>
+                    <td>$<?php echo $resData['total_couple']; ?></td>
+                </tr>
+                <tr>
+                    <th colspan="4">ADDITIONAL OPTIONS AND EVENTS</th>
+                </tr>
+                <tr>
+                    <td >
+                        Tuesday AM July 2 - Madison City Tour (9:30AM - noon) (56 people max!)
+                    </td>
+                    <td>$<?php echo $resData['price_event1']; ?></td>
+                    <td><?php echo $resData['qty_event1']; ?></td>
+                    <td>$<?php echo $resData['total_event1']; ?></td>
+                </tr>
+                <tr>
+                    <td >
+                        Tuesday PM July 2 - Wollersheim Winery (12:30PM - 3:30PM) (56 people max!)
+                    </td>
+                    <td>$<?php echo $resData['price_event2']; ?></td>
+                    <td><?php echo $resData['qty_event2']; ?></td>
+                    <td>$<?php echo $resData['total_event2']; ?></td>
+                </tr>
+                <tr>
+                    <th colspan="4" style="background-color: #0ecad4;color: black">Wednesday, July 3 - Live stein auction conducted by Fox Auctions (open to the public)</th>
+                </tr>
+                <tr>
+                    <td >
+                        Friday, July 5 - Afternoon Tea at the Sky Bar, Edgewater Hotel (limit of 50 attendees)
+                    </td>
+                    <td>$<?php echo $resData['price_tea']; ?></td>
+                    <td><?php echo $resData['qty_tea']; ?></td>
+                    <td>$<?php echo $resData['total_tea']; ?></td>
+                </tr>
+                <tr>
+                    <td >
+                        Stein sales room - Full table - registered attendees only
+                    </td>
+                    <td>$<?php echo $resData['price_full_tables']; ?></td>
+                    <td><?php echo $resData['qty_full_tables']; ?></td>
+                    <td>$<?php echo $resData['total_full_tables']; ?></td>
+                </tr>
+                <tr>
+                    <td >
+                        Stein sales room - Half table - registered attendees only
+                    </td>
+                    <td>$<?php echo $resData['price_half_tables']; ?></td>
+                    <td><?php echo $resData['qty_half_tables']; ?></td>
+                    <td>$<?php echo $resData['total_half_tables']; ?></td>
+                </tr>
+                <tr>
+                    <td >
+                        Additional convention steins (subject to availability)
+                    </td>
+                    <td>$<?php echo $resData['price_steins']; ?></td>
+                    <td><?php echo $resData['qty_steins']; ?></td>
+                    <td>$<?php echo $resData['total_steins']; ?></td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align: right">
+                        <strong>GRAND TOTAL</strong>
+                    </td>
+                    <td>$<?php echo $resData['grand_total']; ?></td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align: right">
+                        The minimum required deposit is 50% of the total of all fees.  <strong>MINIMUM DEPOSIT</strong>
+                    </td>
+                    <td>$<?php echo $resData['minimum_deposit']; ?></td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align: right">
+                        <strong style="color:blue">IF YOU WANT TO PAY MORE THAN THE MINIMUM, ENTER AMOUNT HERE </strong>
+                    </td>
+                    <td>$<?php echo $resData['amount_to_pay']; ?></td>
+                </tr>
+                <tr>
+                    <th colspan="6" style="background-color: #0ecad4;color: black">OTHER CHOICES YOU NEED TO MAKE (and don't forget to click SUBMIT below when you are done)</th>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <table width="100%" cellpadding="5" border="1" cellspacing="0">
+                            <tr>
+                                <td colspan="4"><strong style="color:blue">THURSDAY evening (July 4) in the hotel - German Night - Indicate quantity for each entree choice</strong></td>
+                            </tr>
+                            <tr>
+                                <td><?php echo $resData['qty_thursday_dinner']; ?></td>
+                                <td>Please indicate how many of your party will attend, then enter the quantity for each entree</td>
+                            </tr>
+                            <tr>
+                                <td><?php echo $resData['qty_thurs_entree1']; ?></td>
+                                <td>Sausage Sampler Plate</td>
+                            </tr>
+                            <tr>
+                                <td><?php echo $resData['qty_thurs_entree2']; ?></td>
+                                <td>Smoked Pork Chop</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <table width="100%" cellpadding="5" border="1" cellspacing="0">
+                            <tr>
+                                <td colspan="4"><strong style="color:blue">SATURDAY evening dinner (July 6) in the hotel</strong></td>
+                            </tr>
+                            <tr>
+                                <td><?php echo $resData['qty_saturday_dinner']; ?></td>
+                                <td>Please indicate how many of your party will attend. - Indicate quantity for each entree choice.</td>
+                            </tr>
+                            <tr>
+                                <td><?php echo $resData['qty_sat_entree1']; ?></td>
+                                <td>Herbed Chicken Breast</td>
+                            </tr>
+                            <tr>
+                                <td><?php echo $resData['qty_sat_entree2']; ?></td>
+                                <td>Pan Seared Salmon</td>
+                            </tr>
+                            <tr>
+                                <td><?php echo $resData['qty_sat_entree3']; ?></td>
+                                <td>Beef Short Ribs</td>
+                            </tr>
+                            <tr>
+                                <td><?php echo $resData['qty_sat_entree4']; ?></td>
+                                <td>Mushroom Ravioli (veg.)</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div><?php
 }

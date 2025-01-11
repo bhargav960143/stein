@@ -136,5 +136,17 @@ class dentalfocus_db_function{
 			return true;	
 		}
 	}
+
+    function dentalfocus_con_all_records($df_table_name){
+        global $wpdb;
+        $qrySelect = "SELECT trentium_convention.id,trentium_convention.member_name,trentium_convention.member_email,trentium_convention.member_phone,trentium_convention.grand_total,trentium_convention.created_at,trentium_con_payments.paypal_payer_id FROM trentium_convention LEFT JOIN trentium_con_payments ON trentium_con_payments.con_id = trentium_convention.id ORDER BY trentium_convention.id DESC";
+        $resData = $wpdb->get_results($qrySelect, ARRAY_A);
+        if (count($resData) > 0) {
+            return $resData;
+        }
+        else{
+            return 0;
+        }
+    }
 }
 ?>

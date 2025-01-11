@@ -5,7 +5,7 @@ if (!is_admin()) {
     add_shortcode('ts_membership_sortcode', 'ts_membership_sortcode');
     add_shortcode('ts_paypal_return_sortcode', 'handle_return_page');
     add_shortcode('ts_paypal_registration_sortcode', 'handle_registration_page');
-    add_shortcode('ts_convention_registration_sortcode', 'handle_convention_registration_page');
+    add_shortcode('ts_convention_registration_sortcode', 'ts_convention_registration_form_handle_submission');
     add_shortcode('ts_member_search_result_sortcode', 'handle_member_search_result_page');
     add_shortcode('ts_convention_paypal_return_sortcode', 'handle_convention_return_page');
 }
