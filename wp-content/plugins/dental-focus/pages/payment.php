@@ -21,15 +21,59 @@ if(isset($_REQUEST['action']) && !empty($_REQUEST['action'])){
             dentalfocus_view_payments();
             break;
         default:
-            trentium_membership_payments();
+            trentium_membership_list_payments();
     }
 }
 else{
-    trentium_membership_payments();
+    trentium_membership_list_payments();
 }
 /*
     Create Function for display social media list
 */
+function trentium_membership_list_payments(){
+    /*
+        Setup CSS And JS For Listing of socialmedia records.
+    */
+
+    wp_enqueue_style('datatables-css', 'https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css');
+    wp_enqueue_script('datatables-js', 'https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js', ['jquery']);
+    wp_enqueue_script('membership-payment-js', DENTALFOCUS_SCRIPTS . 'membership-payments.js', ['jquery', 'datatables-js']);
+
+    wp_localize_script('membership-payment-js', 'TrentiumAjax', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('trentium_members_payment_nonce')
+    ]);
+
+
+    ?><div id="pageparentdiv" class="postbox">
+        <h3 class="hndle ui-sortable-handle inside">
+            SCI Membership Payment List &nbsp;
+            <!--<a href="admin.php?page=tssettings&tab=socialmedia&action=add" class="button button-primary button-medium">Add New</a>-->
+        </h3>
+        <div class="inside"><?php
+            dentalfocus_messagedisplay();
+            ?><table class="wp-list-table widefat fixed" id="membershippaymentlist">
+                <thead>
+                <tr>
+                    <th>Sr No</th>
+                    <th>Term</th>
+                    <th>Country</th>
+                    <th>Print/Digital</th>
+                    <th>Membership</th>
+                    <th>Payer ID</th>
+                    <th>Transaction ID</th>
+                    <th>Amount</th>
+                    <th>Email</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div><?php
+}
 function trentium_membership_payments(){
     /*
         Setup CSS And JS For Listing of socialmedia records.

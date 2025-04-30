@@ -132,7 +132,7 @@ class Schema_Types {
 					'value' => 'BlogPosting',
 				],
 				[
-					'name'  => \__( 'Membership Settings Posting', 'wordpress-seo' ),
+					'name'  => \__( 'Social Media Posting', 'wordpress-seo' ),
 					'value' => 'SocialMediaPosting',
 				],
 				[

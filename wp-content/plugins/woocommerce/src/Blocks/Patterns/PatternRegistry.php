@@ -25,7 +25,7 @@ class PatternRegistry {
 			'intro'            => __( 'Intro', 'woocommerce' ),
 			'featured-selling' => __( 'Featured Selling', 'woocommerce' ),
 			'about'            => __( 'About', 'woocommerce' ),
-			'social-media'     => __( 'Membership Settings', 'woocommerce' ),
+			'social-media'     => __( 'Social Media', 'woocommerce' ),
 			'services'         => __( 'Services', 'woocommerce' ),
 			'reviews'          => __( 'Reviews', 'woocommerce' ),
 		];

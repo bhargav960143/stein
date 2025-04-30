@@ -29,7 +29,7 @@ define('RSSSL_KEY', 'ImYOmysvN4aFICsN58qoPw6nQlqXtDmRvtysoS5BB2r0k0Y8DfhxXUjMFvy
 
 // ** Database settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
-define( 'DB_NAME', 'demo_stein' );
+define( 'DB_NAME', 'stein' );
 
 /** Database username */
 define( 'DB_USER', 'root' );

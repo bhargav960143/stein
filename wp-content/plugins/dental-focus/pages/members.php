@@ -27,10 +27,10 @@ if (isset($_REQUEST['action']) && !empty($_REQUEST['action'])) {
             dentalfocus_mmt_sci_members();
             break;
         default:
-            trentium_membership_members();
+            trentium_membership_list_members();
     }
 } else {
-    trentium_membership_members();
+    trentium_membership_list_members();
 }
 /*
     Create Function for display social media list
@@ -120,6 +120,54 @@ function trentium_membership_members()
                 <tr><?php
             }
             ?></tbody>
+        </table>
+    </div>
+    </div><?php
+}
+function trentium_membership_list_members()
+{
+    /*
+        Setup CSS And JS For Listing of socialmedia records.
+    */
+    wp_enqueue_style('datatables-css', 'https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css');
+    wp_enqueue_script('datatables-js', 'https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js', ['jquery']);
+    wp_enqueue_script('membershiplist-js', DENTALFOCUS_SCRIPTS . 'membership-datatables.js', ['jquery', 'datatables-js']);
+
+    wp_localize_script('membershiplist-js', 'TrentiumAjax', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('trentium_members_nonce')
+    ]);
+
+    ?>
+    <div id="pageparentdiv" class="postbox">
+    <h3 class="hndle ui-sortable-handle inside">
+        SCI Membership Members List &nbsp;
+        <a href="admin.php?page=tssettings&tab=members&action=add-mmt" class="button button-primary button-medium">Manually
+            create a new Member registration in the MMT.</a>
+        <a href="admin.php?page=tssettings&tab=members&action=add-mmt-sci" class="button button-primary button-medium">Manually
+            create a new User in the WP-User Table (with SCI number).</a>
+        <a href="admin-post.php?action=export_members_df" class="button button-primary button-medium">Export
+            Master Membership Table (MMT) to CSV file.</a>
+        <a href="admin-post.php?action=backup_members_df" class="button button-primary button-medium">Download
+            a full CSV backup file for the MMT.</a>
+    </h3>
+    <div class="inside"><?php
+        dentalfocus_messagedisplay();
+        ?>
+        <table class="wp-list-table widefat fixed" id="membershiplist">
+            <thead>
+            <tr>
+                <th>Membership No</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Country</th>
+                <th>Home Phone</th>
+                <th>Mobile Phone</th>
+                <th>Action</th>
+            </tr>
+            </thead>
         </table>
     </div>
     </div><?php

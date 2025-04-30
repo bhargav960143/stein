@@ -11,21 +11,317 @@ if (!is_admin()) {
 }
 add_action('init', 'ts_membership_form_handle_submission');
 add_action('init', 'ts_convention_registration_form_handle_submission');
+add_action('wp_ajax_trentium_convention_ajax_list', 'trentium_convention_ajax_list');
+add_action('wp_ajax_trentium_membership_ajax_list', 'trentium_membership_ajax_list');
+add_action('wp_ajax_trentium_membership_payment_ajax_list', 'trentium_membership_payment_ajax_list');
+
+function trentium_membership_payment_ajax_list() {
+    check_ajax_referer('trentium_members_payment_nonce', 'security');
+
+    $objDB = new dentalfocus_db_function();
+    $draw   = intval($_POST['draw']);
+    $start  = intval($_POST['start']);
+    $length = intval($_POST['length']);
+    $search = trim($_POST['search']['value'] ?? '');
+    $order_index = intval($_POST['order'][0]['column'] ?? 0);
+    $order_dir = $_POST['order'][0]['dir'] === 'asc' ? 'ASC' : 'DESC';
+
+    $columns = [
+        'sr_no',
+        'memership_term',
+        'memership_country',
+        'print_or_digital',
+        'membership',
+        'paypal_payer_id',
+        'paypal_tx',
+        'paypal_amount',
+        'payer_email',
+        'first_name',
+        'last_name',
+        'payment_status',
+        'payment_date'
+    ];
+
+    $order_by = $columns[$order_index] ?? 'payment_date';
+
+    $where = '';
+    if (!empty($search)) {
+        $like = '%' . esc_sql($search) . '%';
+        $where = "WHERE (
+            memership_term LIKE '$like' OR
+            memership_country LIKE '$like' OR
+            print_or_digital LIKE '$like' OR
+            membership LIKE '$like' OR
+            paypal_payer_id LIKE '$like' OR
+            paypal_tx LIKE '$like' OR
+            payer_email LIKE '$like' OR
+            first_name LIKE '$like' OR
+            last_name LIKE '$like' OR
+            payment_status LIKE '$like'
+        )";
+    }
+
+    $total_q = "SELECT COUNT(*) as total FROM trentium_membership_payments";
+    $total_result = $objDB->dentalfocus_query($total_q);
+    $recordsTotal = $total_result !== 0 ? $total_result[0]['total'] : 0;
+
+    if ($where) {
+        $filtered_q = "SELECT COUNT(*) as total FROM trentium_membership_payments $where";
+        $filtered_result = $objDB->dentalfocus_query($filtered_q);
+        $recordsFiltered = $filtered_result !== 0 ? $filtered_result[0]['total'] : 0;
+    } else {
+        $recordsFiltered = $recordsTotal;
+    }
+
+    $query = "
+        SELECT * FROM trentium_membership_payments
+        $where
+        ORDER BY $order_by $order_dir
+        LIMIT $start, $length
+    ";
+
+    $rows = $objDB->dentalfocus_query($query);
+    if ($rows === 0) $rows = [];
+
+    $data = [];
+    $sr = $start + 1;
+    foreach ($rows as $r) {
+        $data[] = [
+            'sr_no' => $sr++,
+            'memership_term' => esc_html($r['memership_term']) . ' Yr',
+            'memership_country' => esc_html($r['memership_country']),
+            'print_or_digital' => esc_html($r['print_or_digital']),
+            'membership' => esc_html($r['membership']),
+            'paypal_payer_id' => esc_html($r['paypal_payer_id']),
+            'paypal_tx' => esc_html($r['paypal_tx']),
+            'paypal_amount' => '$' . esc_html($r['paypal_amount']),
+            'payer_email' => esc_html($r['payer_email']),
+            'first_name' => esc_html($r['first_name']),
+            'last_name' => esc_html($r['last_name']),
+            'payment_status' => esc_html($r['payment_status']),
+            'payment_date' => esc_html($r['payment_date'])
+        ];
+    }
+
+    wp_send_json([
+        'draw' => $draw,
+        'recordsTotal' => $recordsTotal,
+        'recordsFiltered' => $recordsFiltered,
+        'data' => $data
+    ]);
+}
+
+
+function trentium_convention_ajax_list() {
+    check_ajax_referer('trentium_convention_nonce', 'security');
+
+    $objDB = new dentalfocus_db_function();
+
+    // DataTables params
+    $draw   = intval($_POST['draw']);
+    $start  = intval($_POST['start']);
+    $length = intval($_POST['length']);
+    $search_value = trim($_POST['search']['value'] ?? '');
+    $order_column_index = intval($_POST['order'][0]['column']);
+    $order_dir = $_POST['order'][0]['dir'] === 'asc' ? 'ASC' : 'DESC';
+
+    // Columns used by DataTables
+    $columns = [
+        'trentium_convention.id',
+        'trentium_convention.member_name',
+        'trentium_convention.member_email',
+        'trentium_convention.member_phone',
+        'trentium_convention.grand_total',
+        'paid_status',
+        'trentium_convention.created_at'
+    ];
+
+    $order_by = isset($columns[$order_column_index]) ? $columns[$order_column_index] : 'trentium_convention.created_at';
+    /*print '<pre>';
+    print_r($order_column_index);
+    print_r($order_dir);
+    print_r($columns);
+    print '</pre>';
+    exit;*/
+    // WHERE clause for search
+    $where = '';
+    if (!empty($search_value)) {
+        $search_value = esc_sql($search_value);
+        $like = "%$search_value%";
+        $where = "WHERE (
+            trentium_convention.member_name LIKE '$like' OR
+            trentium_convention.member_email LIKE '$like' OR
+            trentium_convention.member_phone LIKE '$like'
+        )";
+    }
+
+    // Query total records
+    $total_query = "SELECT COUNT(*) as total FROM trentium_convention";
+    $total_count = $objDB->dentalfocus_query($total_query);
+    $recordsTotal = $total_count[0]['total'] ?? 0;
+
+    // Count filtered records
+    if ($where) {
+        $filtered_query = "
+            SELECT COUNT(*) as total 
+            FROM trentium_convention 
+            LEFT JOIN trentium_con_payments ON trentium_con_payments.con_id = trentium_convention.id
+            $where
+        ";
+        $filtered_result = $objDB->dentalfocus_query($filtered_query);
+        $recordsFiltered = $filtered_result[0]['total'] ?? 0;
+    } else {
+        $recordsFiltered = $recordsTotal;
+    }
+
+    // Main paginated, sorted, filtered query
+    $main_query = "
+        SELECT trentium_convention.id,
+               trentium_convention.member_name,
+               trentium_convention.member_email,
+               trentium_convention.member_phone,
+               trentium_convention.grand_total,
+               trentium_convention.created_at,
+               trentium_con_payments.paypal_payer_id,
+               IF(trentium_con_payments.paypal_payer_id IS NOT NULL AND trentium_con_payments.paypal_payer_id != '', 1, 0) AS paid_status
+        FROM trentium_convention
+        LEFT JOIN trentium_con_payments ON trentium_con_payments.con_id = trentium_convention.id
+        $where
+        ORDER BY $order_by $order_dir
+        LIMIT $start, $length
+    ";
+
+    $rows = $objDB->dentalfocus_query($main_query);
+
+    $data = [];
+    $sr_no = $start + 1;
+    foreach ($rows as $row) {
+        $data[] = [
+            'sr_no' => $sr_no++,
+            'member_name' => esc_html($row['member_name']),
+            'member_email' => esc_html($row['member_email']),
+            'member_phone' => esc_html($row['member_phone']),
+            'grand_total' => '$' . esc_html($row['grand_total']),
+            'paid' => $row['paid_status'] ? 'Yes' : 'No',
+            'created_at' => esc_html($row['created_at']),
+            'action' => '<a class="button button-secondary" href="admin.php?page=tssettings&tab=convention&action=viewinfo&id=' . intval($row['id']) . '">View</a>'
+        ];
+    }
+
+    wp_send_json([
+        'draw' => $draw,
+        'recordsTotal' => $recordsTotal,
+        'recordsFiltered' => $recordsFiltered,
+        'data' => $data
+    ]);
+}
+function trentium_membership_ajax_list() {
+    check_ajax_referer('trentium_members_nonce', 'security');
+
+    $objDB = new dentalfocus_db_function();
+    $draw   = intval($_POST['draw']);
+    $start  = intval($_POST['start']);
+    $length = intval($_POST['length']);
+    $search = trim($_POST['search']['value'] ?? '');
+    $order_index = intval($_POST['order'][0]['column'] ?? 0);
+    $order_dir = $_POST['order'][0]['dir'] === 'asc' ? 'ASC' : 'DESC';
+
+    $columns = [
+        'member_no',
+        'username',
+        'customer_email',
+        'customer_first_name',
+        'customer_last_name',
+        'customer_country',
+        'customer_home_phone',
+        'customer_mobile_phone',
+        'member_no'
+    ];
+
+    $order_by = $columns[$order_index] ?? 'member_no';
+
+    // Build WHERE clause
+    $where = '';
+    if (!empty($search)) {
+        $like = '%' . esc_sql($search) . '%';
+        $where = "WHERE (
+            username LIKE '$like' OR
+            customer_email LIKE '$like' OR
+            customer_first_name LIKE '$like' OR
+            customer_last_name LIKE '$like' OR
+            customer_country LIKE '$like'
+        )";
+    }
+
+    // Count total
+    $total_q = "SELECT COUNT(*) as total FROM trentium_membership_users";
+    $total_result = $objDB->dentalfocus_query($total_q);
+    $recordsTotal = $total_result !== 0 ? $total_result[0]['total'] : 0;
+
+    // Count filtered
+    if ($where) {
+        $filtered_q = "SELECT COUNT(*) as total FROM trentium_membership_users $where";
+        $filtered_result = $objDB->dentalfocus_query($filtered_q);
+        $recordsFiltered = $filtered_result !== 0 ? $filtered_result[0]['total'] : 0;
+    } else {
+        $recordsFiltered = $recordsTotal;
+    }
+
+    // Main query
+    $query = "
+        SELECT * FROM trentium_membership_users 
+        $where 
+        ORDER BY $order_by $order_dir 
+        LIMIT $start, $length
+    ";
+    $rows = $objDB->dentalfocus_query($query);
+    if ($rows === 0) $rows = [];
+
+    $data = [];
+    $sr = $start + 1;
+    foreach ($rows as $r) {
+        $data[] = [
+            'member_no' => esc_html($r['member_no']),
+            'username' => esc_html($r['username']),
+            'customer_email' => esc_html($r['customer_email']),
+            'customer_first_name' => esc_html($r['customer_first_name']),
+            'customer_last_name' => esc_html($r['customer_last_name']),
+            'customer_country' => esc_html($r['customer_country']),
+            'customer_home_phone' => esc_html($r['customer_home_phone']),
+            'customer_mobile_phone' => esc_html($r['customer_mobile_phone']),
+            'action' => '<a class="button button-secondary" href="admin.php?page=tssettings&tab=members&action=edit&member_no=' . esc_attr($r['member_no']) . '">Edit</a>
+                         <a class="button button-secondary" href="admin.php?page=tssettings&tab=members&action=viewinfo&member_no=' . esc_attr($r['member_no']) . '">View</a>'
+        ];
+    }
+
+    wp_send_json([
+        'draw' => $draw,
+        'recordsTotal' => $recordsTotal,
+        'recordsFiltered' => $recordsFiltered,
+        'data' => $data
+    ]);
+}
 
 function handle_member_search_result_page()
 {
     ob_start();
 
     $last_name = NULL;
-    $chapter = NULL;
+    $chapters = NULL;
     $spouse = NULL;
     $state = NULL;
     $country = NULL;
+    
+    /*print '<pre>';
+    print_r($_REQUEST);
+	print '</pre>';
+    exit;*/
+    
     if (isset($_REQUEST['last_name']) && !empty($_REQUEST['last_name'])) {
         $last_name = $_REQUEST['last_name'];
     }
-    if (isset($_REQUEST['chapter']) && !empty($_REQUEST['chapter'])) {
-        $chapter = $_REQUEST['chapter'];
+    if (isset($_REQUEST['chapters']) && !empty($_REQUEST['chapters'])) {
+        $chapters = $_REQUEST['chapters'];
     }
     if (isset($_REQUEST['spouse']) && !empty($_REQUEST['spouse'])) {
         $spouse = $_REQUEST['spouse'];
@@ -85,9 +381,9 @@ WHERE
         $PARM_preamble .= "Last Name like " . $last_name . ".</u>";
         $prepare_params .= " AND customer_last_name LIKE '%" . $last_name . "%'";
     }
-    if ($searchtype == "chapter") {
-        $PARM_preamble .= "Chapter = " . $chapter . ".</u>";
-        $prepare_params .= " AND chapter = '" . $chapter . "'";
+    if ($searchtype == "chapters") {
+        $PARM_preamble .= "Chapter = " . $chapters . ".</u>";
+        $prepare_params .= " AND chapter = '" . $chapters . "'";
     }
     if ($searchtype == "spouse") {
         $PARM_preamble .= "Spouse/Partner name like " . $spouse . ".</u>";
@@ -107,17 +403,21 @@ WHERE
     $objDB = new dentalfocus_db_function();
     $resData = $objDB->dentalfocus_query($prepare_params);
     $htmlCode = "<p style=\"text-align: center; font-size: 20px;\"> " . $PARM_preamble . "</u><br>Members who have asked not to be listed are excluded.<br>Specific fields which members have asked not be shown, will not be shown.</p>";
-    $htmlCode .= '<div style="margin: 0 auto; border: 4px solid sienna; padding:10px; width: 960px; background-color: white;">
+    $htmlCode .= '<style>table tr th { border: none !important;} table tr td { border: none !important;}</style><div style="margin: 0 auto; border: 4px solid sienna; padding:10px; width: 960px; background-color: white;">
     <table style="border: 0 solid blue; border-collapse: collapse; width: 100%;">
         <tbody>
             <tr style="border-bottom: 1px solid blue;">
-                <th width="320px">Name (Last, First)<br>&nbsp;&nbsp;&nbsp;email address<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spouse/Partner name<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Collecting Interests</th>
+                <th width="320px" style="text-align: left">Name (Last, First)<br>&nbsp;&nbsp;&nbsp;email address<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spouse/Partner name<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Collecting Interests</th>
                 <th width="320px">MAILING ADDRESS</th>
                 <th width="180px">Home Phone<br>&nbsp;&nbsp;&nbsp;Cell Phone<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chapter</th>
             </tr>';
     if(isset($resData) && !empty($resData)){
         foreach ($resData as $keyData => $valueData){
-
+            /*print '<pre>';
+            print_r($valueData);
+			print '</pre>';*/
+            $collecting_interests = isset($valueData['collecting_interests']) ? $valueData['collecting_interests'] : '';
+            $customer_spouse = isset($valueData['customer_spouse']) ? $valueData['customer_spouse'] : '';
             $customer_last_name = isset($valueData['customer_last_name']) ? $valueData['customer_last_name'] : '';
             $customer_first_name = isset($valueData['customer_first_name']) ? $valueData['customer_first_name'] : '';
             $customer_email = isset($valueData['customer_email']) ? $valueData['customer_email'] : '';
@@ -128,7 +428,7 @@ WHERE
             $customer_country = isset($valueData['customer_country']) ? $valueData['customer_country'] : '';
             $customer_home_phone = isset($valueData['customer_home_phone']) ? $valueData['customer_home_phone'] : '';
             $cell_phone = isset($valueData['cell_phone']) ? $valueData['cell_phone'] : '';
-            $chapter = isset($valueData['chapter']) ? $valueData['chapter'] : '';
+            $chapters = isset($valueData['chapters']) ? $valueData['chapters'] : '';
 
             if ($DBA == "yes") {
                 $customer_last_name = $valueData['member_no'] . "  " . $valueData['customer_last_name'];
@@ -160,14 +460,16 @@ WHERE
             $htmlCode .= $customer_first_name;
             $htmlCode .= '<br>';
             $htmlCode .= $customer_email;
-            $htmlCode .= '<br></td>
+            $htmlCode .= '<br>';
+            $htmlCode .= $customer_spouse;
+            $htmlCode .= '</td>
 				<td style="vertical-align: top;">';
             $htmlCode .= $customer_address;
             $htmlCode .= '<br>';
             $htmlCode .= $customer_city;
             $htmlCode .= ', ';
             $htmlCode .= $customer_state;
-            $htmlCode .= $customer_zip;
+            $htmlCode .= ' ' . $customer_zip;
             $htmlCode .= '<br>';
             $htmlCode .= $customer_country;
             $htmlCode .= '</td>
@@ -176,8 +478,17 @@ WHERE
             $htmlCode .= '<br>';
             $htmlCode .= $cell_phone;
             $htmlCode .= '<br>';
-            $htmlCode .= $chapter;
+            $htmlCode .= $chapters;
             $htmlCode .= '</td></tr>';
+            
+            if(isset($collecting_interests) && !empty($collecting_interests)){
+                 $htmlCode .= "<tr style='border-bottom: 1px solid blue;'><td colspan='3' style='vertical-align: top;'>";
+                 $htmlCode .= $collecting_interests;
+                 $htmlCode .= '</td></tr>';
+            }
+            
+            
+            
         }
     }
     else{

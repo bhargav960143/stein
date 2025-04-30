@@ -5,7 +5,7 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: SEO, XML sitemap, Content analysis, Readability, Schema
 Tested up to: 6.7
-Stable tag: 23.9
+Stable tag: 24.2
 Requires PHP: 7.2.5
 
 Improve your WordPress SEO: Write better content and have a fully optimized WordPress site using the Yoast SEO plugin.
@@ -274,46 +274,46 @@ Your question has most likely been answered on our help center: [yoast.com/help/
 
 == Changelog ==
 
-= 23.9 =
+= 24.2 =
 
-Release date: 2024-11-19
+Release date: 2025-01-07
 
-Yoast SEO 23.9 brings enhancements to the Yoast SEO Semrush integration and various bug fixes. Find more about Yoast SEO 23.9 in [our release post](https://yoa.st/release-19-11-24)!
-
-#### Enhancements
-
-* Adds a maximum width to the problems and notifications sections on the _General_ page.
-* Adds _Intent_ and _Difficulty_ to the metrics shown in the Semrush integration.
-* Improves the compatibility of the Yoast blocks with WordPress 6.7.
-
-#### Bugfixes
-
-* Fixes a bug where a fatal error is triggered in PHP 8.x when a user's additional contact methods have been improperly set to `null`. Props to [PhilETaylor](https://github.com/PhilETaylor).
-* Fixes a bug where the _First time configuration_ would have a double separator for the title and content.
-* Fixes a bug where the _First time configuration_ would not resize properly on smaller width screens.
-
-#### Other
-
-* Stops PHP notices on WordPress 6.7 about `_load_textdomain_just_in_time` loading incorrectly.
-
-= 23.8 =
-
-Release date: 2024-11-05
-
-Yoast SEO 23.8 brings more enhancements and bugfixes. [Find more information about our software releases and updates here](https://yoa.st/release-5-11-24).
+Yoast SEO 24.2 brings more enhancements and bugfixes. [Find more information about our software releases and updates here](https://yoa.st/release-7-1-25).
 
 #### Enhancements
 
-* Introduces a new, redesigned General page.
-* Adds a notification to inform the user when an error occurs while changing the visibility of a notification or a problem.
+* Improves the tooltips accessibility in the related keyphrase suggestions modal.
 
 #### Bugfixes
 
-* Fixes a bug in our Elementor integration where previously saved slug values of drafts would be ignored.
+* Fixes a bug where a deprecation message would appear in PHP 8+ when saving a post containing images with invalid sources. Props to [kkmuffme](https://github.com/kkmuffme).
+* Fixes a bug where a TypeError would occur when checking for capabilities of SEO Manager user role when the roles were not passed as an array. Props to [kfeinUI](https://github.com/kfeinUI).
+* Fixes a bug where styles on buttons, intent badge and modal links would not adjust the direction when on RTL view.
 
 #### Other
 
-* Sets the _WordPress tested up to_ version to 6.7.
+* Changes the title text on the Yoast installation success page.
+* Fixes a console warning about ReactDOM.render being no longer supported in React 18.
+
+= 24.1 =
+
+Release date: 2024-12-18
+
+Yoast SEO 24.1 adds the Yoast SEO Dashboard to monitor your site's SEO performance in one overview. Find more about Yoast SEO 24.1 in [our release post](https://yoa.st/release-18-12-24)!
+
+#### Enhancements
+
+* Introduces the Yoast Dashboard, a place where site administrators can check the SEO and Readability performance of the site's posts.
+* Adds `Not analyzed` as an option in the readability filter in the posts page.
+* Enhances the existing `Needs improvement` option in the readability filter in the posts page, to include posts that don't have enough content as well.
+
+#### Bugfixes
+
+* Fixes a bug where posts that have been set to explicitly not be noindexed and had no keyword set would not appear in the relevant SEO filter in the posts page.
+
+#### Other
+
+* Improves the translatability of feedback for the _paragraph length_ and the _sentence length_ assessments.
 
 = Earlier versions =
 For the changelog of earlier versions, please refer to [the changelog on yoast.com](https://yoa.st/yoast-seo-changelog).

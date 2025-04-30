@@ -705,32 +705,113 @@ function dentalfocus_export_members() {
     if (isset($_GET['action']) && $_GET['action'] === 'export_members_df') {
         ob_start();
 
-        // Database call to fetch records
         $objDB = new dentalfocus_db_function();
         $resData = $objDB->dentalfocus_select_all_records('trentium_membership_users');
 
         if (!empty($resData)) {
-            // CSV Header Row
-            $csv_header_row = "Mbr #,last_name,first_name,spouse/partner,street_address,city,state,zip,country,HomePhone,cell_phone,email address,chapter,master_steinologist,paid_until,eProsit,Date Paid,NoList,Pmt Terms,FirstYear,Mbr Status,Notes,ReferdBy,collecting_interests\n";
+            $csv_header_row =
+                "username" .
+                "," . "password" .                  // unused, still exported for structure
+                "," . "member_no" .
+                "," . "last_name" .
+                "," . "first_name" .
+                "," . "spouse" .
+                "," . "street_address" .
+                "," . "city" .
+                "," . "state" .
+                "," . "zip" .
+                "," . "country" .
+                "," . "HomePhone" .
+                "," . "alternate_phone" .
+                "," . "email" .
+                "," . "chapter" .
+                "," . "master_steinologist" .
+                "," . "local_chapter_officer" .     // unused
+                "," . "collecting_interests" .
+                "," . "is_admin" .                  // unused
+                "," . "paid_until" .
+                "," . "can_see_paid_until" .        // unused
+                "," . "last_login" .                // unused
+                "," . "1stClass" .
+                "," . "Trans" .                     // unused
+                "," . "Date Paid" .
+                "," . "Changes" .                   // unused
+                "," . "Company" .                   // unused
+                "," . "CellPhone" .                 // unused
+                "," . "OfficePhone" .               // unused
+                "," . "NoList" .
+                "," . "ChapterPosition" .           // unused
+                "," . "Comments" .                  // unused
+                "," . "ReferdBy" .
+                "," . "SubCode" .
+                "," . "FirstYear" .
+                "," . "LastUpdate" .                // unused
+                "," . "Mbr Status" .
+                "," . "TypeOfMembership" .          // unused
+                "," . "Notes" .
+                "\n";
 
             $output = $csv_header_row;
 
-            // CSV Content Rows
-            foreach ($resData as $valueData) {
-                $csv_row_content = '"' . implode('","', array_map('addslashes', $valueData)) . '"' . "\n";
-                $output .= $csv_row_content;
+            foreach ($resData as $row) {
+                $csv_row = [
+                    $row['username'] ?? '',
+                    $row['password'] ?? '',
+                    $row['member_no'] ?? '',
+                    $row['customer_last_name'] ?? '',
+                    $row['customer_first_name'] ?? '',
+                    $row['customer_spouse'] ?? '',
+                    $row['customer_address'] ?? '',
+                    $row['customer_city'] ?? '',
+                    $row['customer_state'] ?? '',
+                    $row['customer_zip'] ?? '',
+                    $row['customer_country'] ?? '',
+                    $row['customer_home_phone'] ?? '',
+                    $row['customer_mobile_phone'] ?? '',
+                    $row['customer_email'] ?? '',
+                    $row['chapter'] ?? '',
+                    $row['master_steinologist'] ?? '',
+                    $row['local_chapter_officer'] ?? '',
+                    $row['collecting_interests'] ?? '',
+                    $row['is_admin'] ?? '',
+                    $row['paid_until'] ?? '',
+                    $row['can_see_paid_until'] ?? '',
+                    $row['last_login'] ?? '',
+                    $row['first_class'] ?? '',
+                    $row['trans'] ?? '',
+                    $row['paid_qtr'] ?? '',
+                    $row['changes'] ?? '',
+                    $row['company'] ?? '',
+                    $row['cell_phone'] ?? '',
+                    $row['Office_phone'] ?? '',
+                    $row['No_list'] ?? '',
+                    $row['chapter_position'] ?? '',
+                    $row['comments'] ?? '',
+                    $row['referred_by'] ?? '',
+                    $row['SubCode'] ?? '',
+                    $row['FirstYear'] ?? '',
+                    $row['LastUpdate'] ?? '',
+                    $row['PastMember'] ?? '',
+                    $row['TypeOfMembership'] ?? '',
+                    $row['Notes'] ?? ''
+                ];
+
+                // Escape values and wrap in quotes
+                $escaped = array_map(function ($value) {
+                    return '"' . addslashes($value) . '"';
+                }, $csv_row);
+
+                $output .= implode(',', $escaped) . "\n";
             }
 
-            // Generate and Output CSV
             $today = date("Y-m-d");
-            $filename = "MMT_all_members_sorted_" . $today . ".csv";
+            $filename = "Users_" . $today . ".csv";
 
             header('Content-Type: text/csv');
             header('Content-Disposition: attachment; filename=' . $filename);
             echo $output;
             exit;
         } else {
-            // Redirect if no data is found
             wp_redirect("admin.php?page=tssettings&tab=members&msg=swr");
             exit;
         }

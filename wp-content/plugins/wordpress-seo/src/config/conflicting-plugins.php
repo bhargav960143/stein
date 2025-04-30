@@ -9,7 +9,7 @@ class Conflicting_Plugins {
 
 	public const OPEN_GRAPH_PLUGINS = [
 		'2-click-socialmedia-buttons/2-click-socialmedia-buttons.php',
-		// 2 Click Membership Settings Buttons.
+		// 2 Click Social Media Buttons.
 		'add-link-to-facebook/add-link-to-facebook.php',         // Add Link to Facebook.
 		'add-meta-tags/add-meta-tags.php',                       // Add Meta Tags.
 		'easy-facebook-share-thumbnails/esft.php',               // Easy Facebook Share Thumbnail.

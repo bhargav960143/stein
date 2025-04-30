@@ -49,6 +49,47 @@ class dentalfocus_db_function{
 			return 0;	
 		}
 	}
+
+    function dentalfocus_select_mmt_master_records($df_table_name,$array_condition = null,$order_by = null,$return_type = true){
+        global $wpdb;
+        $qrySelect = "SELECT mu.member_no,
+       mu.customer_last_name AS last_name,
+       mu.customer_first_name  AS first_name,
+       mu.customer_spouse  AS spouse,
+       mu.customer_address AS address,
+       mu.customer_city AS city,
+       mu.customer_state AS state,
+       mu.customer_zip AS zip,
+       mu.customer_country AS country,
+       mu.customer_home_phone AS home_phone,
+       mu.customer_mobile_phone AS mobile_phone,
+       mu.customer_email AS email,
+       mu.chapter,
+       mu.master_steinologist,
+       mu.paid_until,
+       mp.print_or_digital,
+       mp.payment_date,
+       mu.No_list,
+       mu.SubCode AS 'Pmt Terms',
+       mu.FirstYear,
+       mu.PastMember AS 'Mbr Status',
+       mu.Notes,
+       mu.referred_by,
+       mu.collecting_interests
+FROM trentium_membership_users AS mu
+LEFT JOIN trentium_membership_payments AS mp
+ON mp.id = mu.last_payment_id
+WHERE mu.customer_last_name IS NOT NULL
+AND mu.customer_last_name != ''
+ORDER BY mu.customer_last_name";
+        $resData = $wpdb->get_results($qrySelect, ARRAY_A);
+        if (count($resData) > 0) {
+            return $resData;
+        }
+        else{
+            return 0;
+        }
+    }
 	
 	function dentalfocus_edit_records($df_table_name,$array_condition,$return_type = true){
 		global $wpdb;
