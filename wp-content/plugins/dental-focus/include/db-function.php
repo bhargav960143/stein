@@ -70,9 +70,9 @@ class dentalfocus_db_function{
        mp.print_or_digital,
        mp.payment_date,
        mu.No_list,
-       mu.SubCode AS 'Pmt Terms',
+       mu.SubCode AS 'Pmt_Terms',
        mu.FirstYear,
-       mu.PastMember AS 'Mbr Status',
+       mu.PastMember AS 'Mbr_Status',
        mu.Notes,
        mu.referred_by,
        mu.collecting_interests
@@ -81,7 +81,7 @@ LEFT JOIN trentium_membership_payments AS mp
 ON mp.id = mu.last_payment_id
 WHERE mu.customer_last_name IS NOT NULL
 AND mu.customer_last_name != ''
-ORDER BY mu.customer_last_name";
+ORDER BY mu.member_no DESC";
         $resData = $wpdb->get_results($qrySelect, ARRAY_A);
         if (count($resData) > 0) {
             return $resData;

@@ -706,94 +706,64 @@ function dentalfocus_export_members() {
         ob_start();
 
         $objDB = new dentalfocus_db_function();
-        $resData = $objDB->dentalfocus_select_all_records('trentium_membership_users');
+        $resData = $objDB->dentalfocus_select_mmt_master_records('trentium_membership_users');
 
         if (!empty($resData)) {
             $csv_header_row =
-                "username" .
-                "," . "password" .                  // unused, still exported for structure
-                "," . "member_no" .
-                "," . "last_name" .
-                "," . "first_name" .
-                "," . "spouse" .
-                "," . "street_address" .
-                "," . "city" .
-                "," . "state" .
-                "," . "zip" .
-                "," . "country" .
-                "," . "HomePhone" .
-                "," . "alternate_phone" .
-                "," . "email" .
-                "," . "chapter" .
-                "," . "master_steinologist" .
-                "," . "local_chapter_officer" .     // unused
+                "Mbr #".
+                "," . "last_name".
+                "," . "first_name".
+                "," . "spouse/partner".
+                "," . "street_address".
+                "," . "city".
+                "," . "state".
+                "," . "zip".
+                "," . "country".
+                "," . "HomePhone".
+                "," . "cell_phone".
+                "," . "email address".
+                "," . "chapter".
+                "," . "master_steinologist".
+                "," . "paid_until".
+                "," . "eProsit".
+                "," . "Date Paid".
+                "," . "NoList".
+                "," . "Pmt Terms".
+                "," . "FirstYear".
+                "," . "Mbr Status".
+                "," . "Notes".
+                "," . "ReferdBy".
                 "," . "collecting_interests" .
-                "," . "is_admin" .                  // unused
-                "," . "paid_until" .
-                "," . "can_see_paid_until" .        // unused
-                "," . "last_login" .                // unused
-                "," . "1stClass" .
-                "," . "Trans" .                     // unused
-                "," . "Date Paid" .
-                "," . "Changes" .                   // unused
-                "," . "Company" .                   // unused
-                "," . "CellPhone" .                 // unused
-                "," . "OfficePhone" .               // unused
-                "," . "NoList" .
-                "," . "ChapterPosition" .           // unused
-                "," . "Comments" .                  // unused
-                "," . "ReferdBy" .
-                "," . "SubCode" .
-                "," . "FirstYear" .
-                "," . "LastUpdate" .                // unused
-                "," . "Mbr Status" .
-                "," . "TypeOfMembership" .          // unused
-                "," . "Notes" .
                 "\n";
 
             $output = $csv_header_row;
 
             foreach ($resData as $row) {
                 $csv_row = [
-                    $row['username'] ?? '',
-                    $row['password'] ?? '',
                     $row['member_no'] ?? '',
-                    $row['customer_last_name'] ?? '',
-                    $row['customer_first_name'] ?? '',
-                    $row['customer_spouse'] ?? '',
-                    $row['customer_address'] ?? '',
-                    $row['customer_city'] ?? '',
-                    $row['customer_state'] ?? '',
-                    $row['customer_zip'] ?? '',
-                    $row['customer_country'] ?? '',
-                    $row['customer_home_phone'] ?? '',
-                    $row['customer_mobile_phone'] ?? '',
-                    $row['customer_email'] ?? '',
+                    $row['last_name'] ?? '',
+                    $row['first_name'] ?? '',
+                    $row['spouse'] ?? '',
+                    $row['address'] ?? '',
+                    $row['city'] ?? '',
+                    $row['state'] ?? '',
+                    $row['zip'] ?? '',
+                    $row['country'] ?? '',
+                    $row['home_phone'] ?? '',
+                    $row['mobile_phone'] ?? '',
+                    $row['email'] ?? '',
                     $row['chapter'] ?? '',
                     $row['master_steinologist'] ?? '',
-                    $row['local_chapter_officer'] ?? '',
-                    $row['collecting_interests'] ?? '',
-                    $row['is_admin'] ?? '',
                     $row['paid_until'] ?? '',
-                    $row['can_see_paid_until'] ?? '',
-                    $row['last_login'] ?? '',
-                    $row['first_class'] ?? '',
-                    $row['trans'] ?? '',
-                    $row['paid_qtr'] ?? '',
-                    $row['changes'] ?? '',
-                    $row['company'] ?? '',
-                    $row['cell_phone'] ?? '',
-                    $row['Office_phone'] ?? '',
+                    $row['print_or_digital'] ?? '',
+                    $row['payment_date'] ?? '',
                     $row['No_list'] ?? '',
-                    $row['chapter_position'] ?? '',
-                    $row['comments'] ?? '',
-                    $row['referred_by'] ?? '',
-                    $row['SubCode'] ?? '',
+                    $row['Pmt_Terms'] ?? '',
                     $row['FirstYear'] ?? '',
-                    $row['LastUpdate'] ?? '',
-                    $row['PastMember'] ?? '',
-                    $row['TypeOfMembership'] ?? '',
-                    $row['Notes'] ?? ''
+                    $row['Mbr_Status'] ?? '',
+                    $row['Notes'] ?? '',
+                    $row['referred_by'] ?? '',
+                    $row['collecting_interests'] ?? ''
                 ];
 
                 // Escape values and wrap in quotes
