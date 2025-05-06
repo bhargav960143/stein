@@ -290,7 +290,8 @@ function trentium_membership_ajax_list() {
             'customer_home_phone' => esc_html($r['customer_home_phone']),
             'customer_mobile_phone' => esc_html($r['customer_mobile_phone']),
             'action' => '<a class="button button-secondary" href="admin.php?page=tssettings&tab=members&action=edit&member_no=' . esc_attr($r['member_no']) . '">Edit</a>
-                         <a class="button button-secondary" href="admin.php?page=tssettings&tab=members&action=viewinfo&member_no=' . esc_attr($r['member_no']) . '">View</a>'
+                         <a class="button button-secondary" href="admin.php?page=tssettings&tab=members&action=viewinfo&member_no=' . esc_attr($r['member_no']) . '">View</a>
+                         <a class="button button-secondary" href="admin.php?page=tssettings&tab=members&action=delete&member_no=' . esc_attr($r['member_no']) . '">Delete</a>'
         ];
     }
 

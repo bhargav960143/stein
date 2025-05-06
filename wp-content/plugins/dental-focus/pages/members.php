@@ -663,13 +663,45 @@ function dentalfocus_update_members()
 function dentalfocus_delete_members()
 {
     if (isset($_REQUEST['member_no']) && !empty($_REQUEST['member_no'])) {
-        $df_social_table = 'trentium_membership_users';
-        $socialmedia_id = $_REQUEST['member_no'];
         $objDB = new dentalfocus_db_function();
-        $arrayDeleteData = array(
-            'member_no' => $socialmedia_id
+        $member_no = $_REQUEST['member_no'];
+        $table_member = 'trentium_membership_users';
+        $arrayGetData = array(
+            'member_no' => intval($member_no)
         );
-        $objDB->dentalfocus_delete_records($df_social_table, $arrayDeleteData);
+        $resData = $objDB->dentalfocus_edit_records($table_member, $arrayGetData);
+        $resDataPayment = NULL;
+        if (isset($resData['customer_email']) && !empty($resData['customer_email'])) {
+            //get user meta
+            $table_member = 'wp_users';
+            $arrayGetData = array(
+                'email' => $resData['customer_email']
+            );
+            $resDataEmail = $objDB->dentalfocus_edit_records($table_member, $arrayGetData);
+            if(isset($resDataEmail['ID']) && !empty($resDataEmail['ID'])){
+                //delete user
+                $members_users = 'wp_users';
+                $arrayDeleteUserData = array(
+                    'ID' => $resDataEmail['ID']
+                );
+                $objDB->dentalfocus_delete_records($members_users, $arrayDeleteUserData);
+
+                //delete user meta
+                $members_user_meta = 'wp_usermeta';
+                $arrayDeleteDataMeta = array(
+                    'user_id' => $resDataEmail['ID']
+                );
+                $objDB->dentalfocus_delete_records($members_user_meta, $arrayDeleteDataMeta);
+            }
+        }
+
+        // delete member user
+        $members_user = 'trentium_membership_users';
+        $arrayDeleteData = array(
+            'member_no' => intval($member_no)
+        );
+        $objDB->dentalfocus_delete_records($members_user, $arrayDeleteData);
+
         wp_redirect("admin.php?page=tssettings&tab=members&msg=rds");
         exit;
     } else {
