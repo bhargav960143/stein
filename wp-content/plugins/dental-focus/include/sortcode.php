@@ -312,12 +312,12 @@ function handle_member_search_result_page()
     $spouse = NULL;
     $state = NULL;
     $country = NULL;
-    
+
     /*print '<pre>';
     print_r($_REQUEST);
 	print '</pre>';
     exit;*/
-    
+
     if (isset($_REQUEST['last_name']) && !empty($_REQUEST['last_name'])) {
         $last_name = $_REQUEST['last_name'];
     }
@@ -481,203 +481,24 @@ WHERE
             $htmlCode .= '<br>';
             $htmlCode .= $chapters;
             $htmlCode .= '</td></tr>';
-            
+
             if(isset($collecting_interests) && !empty($collecting_interests)){
-                 $htmlCode .= "<tr style='border-bottom: 1px solid blue;'><td colspan='3' style='vertical-align: top;'>";
-                 $htmlCode .= $collecting_interests;
-                 $htmlCode .= '</td></tr>';
+                $htmlCode .= "<tr style='border-bottom: 1px solid blue;'><td colspan='3' style='vertical-align: top;'>";
+                $htmlCode .= $collecting_interests;
+                $htmlCode .= '</td></tr>';
             }
-            
-            
-            
+
+
+
         }
     }
     else{
-        $htmlCode .= "<tr><td colspan='4' style='text-align: center;'><a href='https://demo.stein-collectors.org/member-search/'>Return to SEARCH</tr>";
+        $htmlCode .= "<tr><td colspan='4' style='text-align: center;'><a href='https://stein-collectors.org/member-search/'>Return to SEARCH</tr>";
     }
 
-	$htmlCode .= '</tbody></table></div>';
+    $htmlCode .= '</tbody></table></div>';
     return $htmlCode;
 }
-
-/*function handle_registration_page(){
-    ob_start();
-    $htmlCode = "<div style=\"margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;\"><table>
-<tbody>
-<tr>
-<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
-<td>There are issue with your registration, You can email us on <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a> 
-
-<a href=\"http://stein-collectors.org/\">Click here </a>to return to the home page of Stein Collectors International.</td>
-</tr>
-</tbody>
-</table></div>";
-
-    if (isset($_REQUEST['id']) && !empty($_REQUEST['id'])) {
-        $objDB = new dentalfocus_db_function();
-        $df_social_table = 'trentium_membership_payments';
-        $arrayEditData = array(
-            'id' => "'" . $_REQUEST['id'] . "'"
-        );
-        $resData = $objDB->dentalfocus_edit_records($df_social_table,$arrayEditData);
-        if($resData){
-            $df_users_table = 'trentium_membership_users';
-            $arrayEditData = array(
-                'username' => "'" . $_REQUEST['username'] . "'"
-            );
-            $resDataUser = $objDB->dentalfocus_edit_records($df_users_table,$arrayEditData);
-            if(!empty($resDataUser)){
-                $htmlCodeError = "<div style=\"margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;\"><table>
-<tbody>
-<tr>
-<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
-<td>Username already used, please try with different one. Or You can connect with us on <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a> 
-
-<a href=\"http://stein-collectors.org/\">Click here </a>to return to the home page of Stein Collectors International.</td>
-</tr>
-</tbody>
-</table></div>";
-                echo $htmlCodeError;
-                return ob_get_clean();
-            }
-
-            $arrayEditID = array(
-                'last_payment_id' => "'" . $_REQUEST['id'] . "'"
-            );
-            $resDataUserID = $objDB->dentalfocus_edit_records($df_users_table,$arrayEditID);
-            if(!empty($resDataUserID)){
-                $htmlCodeError = "<div style=\"margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;\"><table>
-<tbody>
-<tr>
-<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
-<td>User already created for payment, You can connect with us on <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a> 
-
-<a href=\"http://stein-collectors.org/\">Click here </a>to return to the home page of Stein Collectors International.</td>
-</tr>
-</tbody>
-</table></div>";
-                echo $htmlCodeError;
-                return ob_get_clean();
-            }
-
-            $customer_first_name = NULL;
-            if(isset($_REQUEST['customer_first_name']) && !empty($_REQUEST['customer_first_name'])){
-                $customer_first_name = $_REQUEST['customer_first_name'];
-            }
-
-            $customer_last_name = NULL;
-            if(isset($_REQUEST['customer_last_name']) && !empty($_REQUEST['customer_last_name'])){
-                $customer_last_name = $_REQUEST['customer_last_name'];
-            }
-
-            $customer_address = NULL;
-            if(isset($_REQUEST['customer_address']) && !empty($_REQUEST['customer_address'])){
-                $customer_address = $_REQUEST['customer_address'];
-            }
-
-            $customer_country = NULL;
-            if(isset($_REQUEST['customer_country']) && !empty($_REQUEST['customer_country'])){
-                $customer_country = $_REQUEST['customer_country'];
-            }
-
-            $customer_state = NULL;
-            if(isset($_REQUEST['customer_state']) && !empty($_REQUEST['customer_state'])){
-                $customer_state = $_REQUEST['customer_state'];
-            }
-
-            $customer_city = NULL;
-            if(isset($_REQUEST['customer_city']) && !empty($_REQUEST['customer_city'])){
-                $customer_city = $_REQUEST['customer_city'];
-            }
-
-            $customer_zip = NULL;
-            if(isset($_REQUEST['customer_zip']) && !empty($_REQUEST['customer_zip'])){
-                $customer_zip = $_REQUEST['customer_zip'];
-            }
-
-            if(!empty($customer_first_name) && !empty($customer_last_name) && !empty($customer_address) && !empty($customer_country) && !empty($customer_state) && !empty($customer_city) && !empty($customer_zip)){
-
-                $arrayInsertData = array(
-                    'last_payment_id' => $_REQUEST['id'],
-                    'customer_first_name' => isset($customer_first_name) ? strtoupper(sanitize_title($customer_first_name)) : NULL,
-                    'customer_last_name' => isset($customer_last_name) ? strtoupper(sanitize_title($customer_last_name)) : NULL,
-                    'customer_address' => isset($customer_address) ? strtoupper(sanitize_title($customer_address)) : NULL,
-                    'customer_city' => isset($customer_city) ? strtoupper(sanitize_title($customer_city)) : NULL,
-                    'customer_state' => isset($customer_state) ? strtoupper(sanitize_title($customer_state)) : NULL,
-                    'customer_zip' => isset($customer_zip) ? strtoupper(sanitize_title($customer_zip)) : NULL,
-                    'customer_country' => isset($customer_country) ? strtoupper(sanitize_title($customer_country)) : NULL,
-                    'customer_email' => isset($_REQUEST['customer_email']) ? strtoupper($_REQUEST['customer_email']) : NULL,
-                    'customer_spouse' => isset($_REQUEST['customer_spouse']) ? strtoupper($_REQUEST['customer_spouse']) : NULL,
-                    'customer_home_phone' => isset($_REQUEST['customer_home_phone']) ? $_REQUEST['customer_home_phone'] : NULL,
-                    'customer_mobile_phone' => isset($_REQUEST['customer_mobile_phone']) ? $_REQUEST['customer_mobile_phone'] : NULL,
-                    'listing_option' => isset($_REQUEST['listing_option']) ? $_REQUEST['listing_option'] : NULL,
-                    'referred_by' => isset($_REQUEST['referred_by']) ? strtoupper($_REQUEST['referred_by']) : NULL,
-                    'username' => isset($_REQUEST['username']) ? $_REQUEST['username'] : NULL,
-                    'password' => isset($_REQUEST['password']) ? md5($_REQUEST['password']) : NULL,
-                    'purchaser_name' => isset($_REQUEST['purchaser_name']) ? strtoupper($_REQUEST['purchaser_name']) : NULL,
-                    'purchaser_email' => isset($_REQUEST['purchaser_email']) ? strtoupper($_REQUEST['purchaser_email']) : NULL
-                );
-                $insertedId = $objDB->dentalfocus_insert_records($df_users_table,$arrayInsertData);
-
-                if(!$insertedId){
-                    if(isset($_REQUEST['username']) && !empty($_REQUEST['username']) && isset($_REQUEST['password']) && !empty($_REQUEST['password'])){
-                        $userdata = array(
-                            'user_login'    => $_REQUEST['username'],                // Username
-                            'user_email'    => isset($_REQUEST['customer_email']) ? strtoupper($_REQUEST['customer_email']) : NULL,    // Email
-                            'user_pass'     => md5($_REQUEST['password']),   // Password (optional: use wp_generate_password for auto-generation)
-                            'first_name'    => isset($customer_first_name) ? strtoupper(sanitize_title($customer_first_name)) : NULL,
-                            'last_name'     => isset($customer_last_name) ? strtoupper(sanitize_title($customer_last_name)) : NULL,
-                            'role'          => 'subscriber'             // Assign a role (e.g., administrator, editor, subscriber)
-                        );
-
-                        // Insert the user
-                        $user_id = wp_insert_user($userdata);
-
-                        if(!$user_id){
-                            $htmlCodeError = "<div style=\"margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;\"><table>
-<tbody>
-<tr>
-<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
-<td>Oops Not able to create new user, You can connect with us on <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a> 
-
-<a href=\"http://stein-collectors.org/\">Click here </a>to return to the home page of Stein Collectors International.</td>
-</tr>
-</tbody>
-</table></div>";
-                            echo $htmlCodeError;
-                            return ob_get_clean();
-                        }
-                        else{
-                            wp_redirect('https://demo.stein-collectors.org/new-member-registration-confirmation/');
-                            exit;
-                        }
-                    }
-                    else{
-                        wp_redirect('https://demo.stein-collectors.org/new-member-registration-confirmation/');
-                        return ob_get_clean();
-                    }
-                }
-                else{
-                    wp_redirect('https://demo.stein-collectors.org/new-member-registration-confirmation/');
-                    return ob_get_clean();
-                }
-
-            }
-            else{
-                echo $htmlCode;
-                return ob_get_clean();
-            }
-        }
-        else{
-            echo $htmlCode;
-            return ob_get_clean();
-        }
-    }
-    else{
-        echo $htmlCode;
-        return ob_get_clean();
-    }
-}*/
 
 function handle_registration_page()
 {
@@ -689,13 +510,13 @@ function handle_registration_page()
             <tbody>
                 <tr>
                     <td width=\"100\">
-                        <img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" />
+                        <img class=\"alignnone size-full wp-image-1647\" src=\"https://stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" />
                     </td>
                     <td>
                         There are issues with your registration. Please contact us at 
                         <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a>.
                         <br>
-                        <a href=\"http://stein-collectors.org/\">Click here</a> to return to the home page of Stein Collectors International.
+                        <a href=\"https://stein-collectors.org/\">Click here</a> to return to the home page of Stein Collectors International.
                     </td>
                 </tr>
             </tbody>
@@ -748,42 +569,65 @@ function handle_registration_page()
         'customer_zip' => strtoupper(sanitize_text_field($_REQUEST['customer_zip'])),
         'customer_country' => strtoupper(sanitize_text_field($_REQUEST['customer_country'])),
         'customer_email' => sanitize_email($_REQUEST['customer_email']),
+        'collecting_interests' => isset($_REQUEST['collecting_interests']) ? $_REQUEST['collecting_interests'] : NULL,
+        'customer_spouse' => isset($_REQUEST['customer_spouse']) ? $_REQUEST['customer_spouse'] : NULL,
+        'customer_home_phone' => isset($_REQUEST['customer_home_phone']) ? $_REQUEST['customer_home_phone'] : NULL,
+        'customer_mobile_phone' => isset($_REQUEST['customer_mobile_phone']) ? $_REQUEST['customer_mobile_phone'] : NULL,
+        'listing_option' => isset($_REQUEST['listing_option']) ? $_REQUEST['listing_option'] : NULL,
+        'purchaser_name' => isset($_REQUEST['purchaser_name']) ? $_REQUEST['purchaser_name'] : NULL,
+        'purchaser_email' => isset($_REQUEST['purchaser_email']) ? $_REQUEST['purchaser_email'] : NULL,
+        'referred_by' => isset($_REQUEST['referred_by']) ? $_REQUEST['referred_by'] : NULL,
         'password' => isset($_REQUEST['password']) ? wp_hash_password($_REQUEST['password']) : null, // Use WordPress password hashing
     ];
 
-    $insert_result = $objDB->dentalfocus_insert_records($user_table, $insert_data);
+    /*$insert_result = $objDB->dentalfocus_insert_records($user_table, $insert_data);
 
     if (!$insert_result) {
         return str_replace('There are issues', 'User could not be created', $default_html);
+    }*/
+
+    // ✅ Use WordPress mail function
+    $message2  = "PayPal payment: $" . esc_html($payment_result['paypal_amount']) . "\n\n";
+    $message2 .= "Records have been created in the SCI master database and the WP User Table.\n\n";
+
+    if (!empty($username) && !empty($_POST['password'])) {
+        $message2 .= "User ID: " . esc_html($username) . "\n";
     }
 
-    $message  = "";     // initialize
+    $message2 .= "First: " . strtoupper(sanitize_text_field($_POST['customer_first_name'])) . "\n";
+    $message2 .= "Last: " . strtoupper(sanitize_text_field($_POST['customer_last_name'])) . "\n\n";
+    $message2 .= "Address: " . strtoupper(sanitize_text_field($_POST['customer_address'])) . "\n";
+    $message2 .= "City: " . strtoupper(sanitize_text_field($_POST['customer_city'])) . "\n";
+    $message2 .= "State: " . strtoupper(sanitize_text_field($_POST['customer_state'])) . "\n";
+    $message2 .= "Zip: " . strtoupper(sanitize_text_field($_POST['customer_zip'])) . "\n";
+    $message2 .= "Country: " . strtoupper(sanitize_text_field($_POST['customer_country'])) . "\n\n";
+    $message2 .= "Email address: " . sanitize_email($_POST['customer_email']) . "\n";
+    $message2 .= "Spouse: " . strtoupper(sanitize_text_field($_POST['customer_spouse'])) . "\n";
+    $message2 .= "Home Phone: " . strtoupper(sanitize_text_field($_POST['customer_home_phone'])) . "\n";
+    $message2 .= "Mobile Phone: " . strtoupper(sanitize_text_field($_POST['customer_mobile_phone'])) . "\n";
+    $message2 .= "Collecting Interests: " . strtoupper(sanitize_text_field($_POST['collecting_interests'])) . "\n";
+    $message2 .= "NoList option: " . strtoupper(sanitize_text_field($_POST['listing_option'])) . "\n";
+    $message2 .= "Referred By: " . strtoupper(sanitize_text_field($_POST['referred_by'])) . "\n";
+    $message2 .= "email created by https://stein-collectors.org/ts-paypal-thankyou\n";
 
-    if (isset($_GET)) {
-        foreach($_GET as $key => $value) {
-            $message .= "GET value " . $key . "=" . $value . "\r\n";
-        }
-        $message .= "\r\n";
-    }
-    if (isset($_POST)) {
-        foreach($_POST as $key => $value) {
-            $message .= "POST value " . $key . "=" . $value . "\r\n";
-        }
-        $message .= "\r\n";
-    }
+    $email_subject2 = "New member registration - " . strtoupper(sanitize_text_field($_POST['customer_first_name'])) . " " . strtoupper(sanitize_text_field($_POST['customer_last_name']));
 
-    $message .= "Payment Status: " . $payment_result['payment_status'] . "\r\n";
-    $message .= "PayPal pmt. of $" . $payment_result['paypal_amount'] . " for " . $payment_result['item_name'] . "\r\n";
-    $message .= "email created by JoinRenew/v2/RegistrationForm-US.php" . "\r\n";
+    $email_to2 = 'scidbm2022@gmail.com';
 
-    $email_to = 'webmaster@stein-collectors.org,dbm@stein-collectors.org';
-    $email_subject = "PayPal Transaction " . $payment_result['paypal_tx'] . " - Status = " . $payment_result['paypal_st'];
-    $headers  = 'From: do_not_reply@stein-collectors.org' . "\r\n";
-    $headers .= 'Reply-To: do_not_reply@stein-collectors.org' . "\r\n";
-    $headers .= 'Bcc: webmaster@stein-collectors.org,dbm@stein-collectors.org' . "\r\n";
-    $headers .= 'X-Mailer: PHP/' . phpversion();
+    // ✅ Use an array for headers (WordPress style)
+    $headers2 = array(
+        'From: do_not_reply@stein-collectors.org',
+        'Reply-To: do_not_reply@stein-collectors.org',
+        'Bcc: webmaster@stein-collectors.org,dbm@stein-collectors.org,bhargav@trentiums.com',
+    );
+    $headers3 = array(
+        'From: do_not_reply@stein-collectors.org',
+        'Reply-To: do_not_reply@stein-collectors.org'
+    );
 
-    mail($email_to, $email_subject, $message, $headers);
+    // ✅ SEND using wp_mail
+    mail($email_to2, $email_subject2, $message2, $headers2);
+    mail('crro26@gmail.com', $email_subject2, $message2, $headers3);
 
     // Add user to WordPress
     if (!empty($username) && !empty($_REQUEST['password'])) {
@@ -817,13 +661,13 @@ function ts_convention_registration_form_handle_submission()
             <tbody>
                 <tr>
                     <td width=\"100\">
-                        <img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" />
+                        <img class=\"alignnone size-full wp-image-1647\" src=\"https://stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" />
                     </td>
                     <td>
                         There are issues with your registration. Please contact us at 
                         <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a>.
                         <br>
-                        <a href=\"http://stein-collectors.org/\">Click here</a> to return to the home page of Stein Collectors International.
+                        <a href=\"https://stein-collectors.org/\">Click here</a> to return to the home page of Stein Collectors International.
                     </td>
                 </tr>
             </tbody>
@@ -994,7 +838,7 @@ function ts_convention_registration_form_handle_submission()
        </head>
    	<body>
    <div style="max-width: 700px;">
-           <h2>We look forward to seeing you in Madison, Wisconsin at SCIs 57th annual convention!<br>Early Bird days - July 2-3, Convention - July 4-6</h2>
+           <h2>We look forward to seeing you in Wyndham Grand Pittsburgh Downtown at SCIs 58th annual convention!<br>August 11 - 12 - Early Bird Events, August 14 - 15 - Convention</h2>
            <h3>You will receive a confirmation email when your payment is received.</h3>
            <table cellspacing="6" style="max-width: 100%; border-collapse: collapse; padding: 10px;">';
 
@@ -1124,11 +968,11 @@ function ts_convention_registration_form_handle_submission()
 
     $htmlContent .= '</table>';
 
-    $htmlContent .=  '<p style="text-align: justify; max-width: 85%;">SCI has negotiated a special room rate with The Madison Concourse and Governors Club of $139 for either a single or double room. The rate is available three days pre- and post-convention. Register as soon as possible to ensure you receive this special rate. To make your reservation call the hotel directly, toll free, at 1-800-356-8293 - say you are with the Stein Collectors International 2024 Annual Convention.
+    $htmlContent .=  '<p style="text-align: justify; max-width: 85%;">SCI has negotiated a special rate of $149 for either a single or a double room at Wyndham Grand Pittsburgh Downtown, 600 Commonwealth Place, Pittsburgh, PA 15222. This rate is available until July 15th, or when the group block is sold out. To make your reservation call the hotel toll free at (412) 391-4600 - say you are with the Stein Collectors International 2025 Annual Convention.
    </p>
    <p style="font-size:1.3em; font-weight: bold;">
    Questions about your REGISTRATION?<br>Contact Celia Clark at crro26@gmail.com or 936-828-6539<BR><BR>
-   Questions about the CONVENTION?<br>Contact David Bruha at dsbruha@Frontier.com or 715-277-3796
+   Questions about the CONVENTION?<br>Contact  John Kelly at johnlacykelly@embarqmail.com or (910) 814-7848
    </p>
    <p style="font-size: small;">email generated by <br>' . $refURL . '</p>';
 
@@ -1155,11 +999,11 @@ function ts_convention_registration_form_handle_submission()
     $subject = "SCI Convention Registration for: " . $memberName;
 
     // Send email and check status
-    // if (! mail($to,$subject,$htmlContent,$headers)) {
+    // if (! wp_mail($to,$subject,$htmlContent,$headers)) {
     //      echo('Non-specific system failure, please go back and resubmit your registration request.');
     //  	exit();
     //}
-    mail($to,$subject,$htmlContent,$headers);
+    wp_mail($to,$subject,$htmlContent,$headers);
 
     // Database operations
     $objDB = new dentalfocus_db_function();
@@ -1292,10 +1136,10 @@ function handle_return_page()
     $htmlCode = "<div style=\"margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;\"><table>
 <tbody>
 <tr>
-<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
+<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"https://stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
 <td>There are issue with payment, You can email us on <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a> 
 
-<a href=\"http://stein-collectors.org/\">Click here </a>to return to the home page of Stein Collectors International.</td>
+<a href=\"https://stein-collectors.org/\">Click here </a>to return to the home page of Stein Collectors International.</td>
 </tr>
 </tbody>
 </table></div>";
@@ -1304,6 +1148,42 @@ function handle_return_page()
         $custom_data = json_decode(base64_decode(sanitize_text_field($_REQUEST['custom'])), true);
 
         if ($custom_data) {
+
+            $mode           = $_REQUEST["custom"];
+            $amt            = $_REQUEST["amt"];
+            $item_name      = $_REQUEST["item_name"];
+            $payment_status = $_REQUEST["st"];
+            $transaction_id = $_REQUEST["tx"];
+
+
+            $message  = "";     // initialize
+
+            if (isset($_REQUEST)) {
+                foreach($_REQUEST as $key => $value) {
+                    $message .= "GET value " . $key . "=" . $value . "\r\n";
+                }
+                $message .= "\r\n";
+            }
+            if (isset($_POST)) {
+                foreach($_POST as $key => $value) {
+                    $message .= "POST value " . $key . "=" . $value . "\r\n";
+                }
+                $message .= "\r\n";
+            }
+
+            $message .= "Payment Status: " . $payment_status . "\r\n";
+            $message .= "PayPal pmt. of $" . $amt . " for " . $item_name . "\r\n";
+            $message .= "email created by https://stein-collectors.org/join-renew/" . "\r\n";
+
+            $email_to = 'bhargav@trentiums.com';
+            $email_subject = "PayPal Transaction " . $transaction_id . " - Status = " . $payment_status;
+            $headers  = 'From: do_not_reply@stein-collectors.org' . "\r\n";
+            $headers .= 'Reply-To: do_not_reply@stein-collectors.org' . "\r\n";
+            $headers .= 'Bcc: webmaster@stein-collectors.org,dbm@stein-collectors.org,bhargav@trentiums.com' . "\r\n";
+            $headers .= 'X-Mailer: PHP/' . phpversion();
+
+            mail($email_to, $email_subject, $message, $headers);
+
             $membership = $custom_data['membership'];
             $print_or_digital = $custom_data['print_or_digital'];
             $country = $custom_data['country'];
@@ -1430,7 +1310,7 @@ function handle_return_page()
                 <tr>
                     <td colspan="2">
                         <p style="text-align: justify;"><img
-                                src="https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg"
+                                src="https://stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg"
                                 alt="" align="left" hspace="10"><span style="color: blue;">Before we can
 start your
 subscription we need your mailing address, and we hope you will provide
@@ -1696,7 +1576,7 @@ be for the subscriber.  Fields marked with * are required.</span><br>
                 <tr>
                     <td colspan="2">
                         <p style="text-align: justify;"><img
-                                src="https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg"
+                                src="https://stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg"
                                 alt="" align="left" hspace="10"><span style="color: blue;">Before we can
 start your
 subscription we need your mailing address, and we hope you will provide
@@ -1861,7 +1741,7 @@ be for the subscriber.  Fields marked with * are required.</span><br>
                 $htmlCodeReg = '';
                 $htmlCodeReg .= '<div style="max-width: 800px; background-color: white; margin: 0 auto; border: solid 1px blue">
 <p style="overflow: auto; color: blue">
-<img style="width: 85px; height: 116px; float: left; margin: 10px;" src="https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg">
+<img style="width: 85px; height: 116px; float: left; margin: 10px;" src="https://stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg">
 <br><br>Thanks for renewing! <a href="http://localhost/tsp/stein">Click here</a> to return to the SCI website.</p>
 
 </div>';
@@ -1884,10 +1764,10 @@ function handle_convention_return_page()
     $htmlCode = "<div style=\"margin: 0px auto; padding: 0px; max-width: 800px; width: 100%;\"><table>
 <tbody>
 <tr>
-<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"https://demo.stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
+<td width=\"100\"><img class=\"alignnone size-full wp-image-1647\" src=\"https://stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" /></td>
 <td>There are issue with payment, You can email us on <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a> 
 
-<a href=\"http://stein-collectors.org/\">Click here </a>to return to the home page of SCI Convention Registration.</td>
+<a href=\"https://stein-collectors.org/\">Click here </a>to return to the home page of SCI Convention Registration.</td>
 </tr>
 </tbody>
 </table></div>";
@@ -1908,8 +1788,8 @@ function handle_convention_return_page()
             $memberName = substr($itemName, $memberNamePosition, $memberNameLength);
 
             $memberEmail = 'webmaster@stein-collectors.org';
-            if (isset ($_GET['custom'])) {
-                $memberEmail = urldecode($_GET['custom']);
+            if (isset ($member_email)) {
+                $memberEmail = $member_email;
             }
 
             $emailContent = '
@@ -1940,7 +1820,7 @@ function handle_convention_return_page()
             $headers .= 'Cc: webmaster@stein-collectors.org,crro26@gmail.com,sciconvenreg@comcast.net' . "\r\n";
             $to = $memberEmail;
             $subject = "SCI Convention Payment from " . $memberName;
-            mail($to,$subject,$emailContent,$headers);
+            wp_mail($to,$subject,$emailContent,$headers);
 
             $objDB = new dentalfocus_db_function();
 
@@ -1995,7 +1875,7 @@ function handle_convention_return_page()
                 $recordID = $objDB->dentalfocus_insert_records($df_social_table, $arrayInsertData, true);
 
                 if (!$recordID) {
-                    wp_redirect('https://demo.stein-collectors.org/convention-payment-received/');
+                    wp_redirect('https://stein-collectors.org/convention-payment-received/');
                     exit;
                 }
                 else{
@@ -2213,7 +2093,7 @@ function ts_membership_sortcode($attrs)
     $htmlCode .= '</tbody>
                 </table>';
 
-    $htmlCode .= '<p>Options to pay by PayPal are available below. <span style="font-style: italic;">Please consider making your payment by check so we can avoid PayPal fees.</span> A downloadable subscription form is available by clicking <a style="font-weight: bold;" href="https://demo.stein-collectors.org/wp-content/uploads/2024/11/pay-by-check_Rev20221002.pdf">HERE</a>.<br></p>';
+    $htmlCode .= '<p>Options to pay by PayPal are available below. <span style="font-style: italic;">Please consider making your payment by check so we can avoid PayPal fees.</span> A downloadable subscription form is available by clicking <a style="font-weight: bold;" href="https://stein-collectors.org/wp-content/uploads/2024/11/pay-by-check_Rev20221002.pdf">HERE</a>.<br></p>';
 
 
     if (isset($_GET['form_submitted']) && $_GET['form_submitted'] === 'true') {
