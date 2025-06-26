@@ -163,8 +163,8 @@ function trentium_convention_ajax_list() {
     // Count filtered records
     if ($where) {
         $filtered_query = "
-            SELECT COUNT(*) as total 
-            FROM trentium_convention 
+            SELECT COUNT(*) as total
+            FROM trentium_convention
             LEFT JOIN trentium_con_payments ON trentium_con_payments.con_id = trentium_convention.id
             $where
         ";
@@ -269,9 +269,9 @@ function trentium_membership_ajax_list() {
 
     // Main query
     $query = "
-        SELECT * FROM trentium_membership_users 
-        $where 
-        ORDER BY $order_by $order_dir 
+        SELECT * FROM trentium_membership_users
+        $where
+        ORDER BY $order_by $order_dir
         LIMIT $start, $length
     ";
     $rows = $objDB->dentalfocus_query($query);
@@ -513,7 +513,7 @@ function handle_registration_page()
                         <img class=\"alignnone size-full wp-image-1647\" src=\"https://stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" />
                     </td>
                     <td>
-                        There are issues with your registration. Please contact us at 
+                        There are issues with your registration. You can back and change username and try again or Please contact us at
                         <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a>.
                         <br>
                         <a href=\"https://stein-collectors.org/\">Click here</a> to return to the home page of Stein Collectors International.
@@ -539,14 +539,16 @@ function handle_registration_page()
     if (!$payment_result) {
         return $default_html;
     }
+    $username = NULL;
+    if (isset($_REQUEST['username']) && !empty($_REQUEST['username']) && isset($_REQUEST['password']) && !empty($_REQUEST['password'])) {
+        // Check username uniqueness
+        $username = sanitize_text_field($_REQUEST['username'] ?? '');
+        $user_data = ['username' => "'" . $username . "'"];
+        $user_result = $objDB->dentalfocus_edit_records($user_table, $user_data);
 
-    // Check username uniqueness
-    $username = sanitize_text_field($_REQUEST['username'] ?? '');
-    $user_data = ['username' => "'" . $username . "'"];
-    $user_result = $objDB->dentalfocus_edit_records($user_table, $user_data);
-
-    if (!empty($user_result)) {
-        return str_replace('There are issues', 'Username already used', $default_html);
+        if (!empty($user_result)) {
+            return str_replace('There are issues', 'Username already used', $default_html);
+        }
     }
 
     // Validate required fields
@@ -580,14 +582,14 @@ function handle_registration_page()
         'password' => isset($_REQUEST['password']) ? wp_hash_password($_REQUEST['password']) : null, // Use WordPress password hashing
     ];
 
-    /*$insert_result = $objDB->dentalfocus_insert_records($user_table, $insert_data);
+    $insert_result = $objDB->dentalfocus_insert_records($user_table, $insert_data);
 
     if (!$insert_result) {
         return str_replace('There are issues', 'User could not be created', $default_html);
-    }*/
+    }
 
     // ✅ Use WordPress mail function
-    $message2  = "PayPal payment: $" . esc_html($payment_result['paypal_amount']) . "\n\n";
+    $message2  = "PayPal payment: $" . $payment_result['paypal_amount'] . "\n\n";
     $message2 .= "Records have been created in the SCI master database and the WP User Table.\n\n";
 
     if (!empty($username) && !empty($_POST['password'])) {
@@ -618,16 +620,17 @@ function handle_registration_page()
     $headers2 = array(
         'From: do_not_reply@stein-collectors.org',
         'Reply-To: do_not_reply@stein-collectors.org',
-        'Bcc: webmaster@stein-collectors.org,dbm@stein-collectors.org,bhargav@trentiums.com',
+        'Bcc: webmaster@stein-collectors.org,scidbm2022@gmail.com,bhargav@trentiums.com',
     );
     $headers3 = array(
         'From: do_not_reply@stein-collectors.org',
-        'Reply-To: do_not_reply@stein-collectors.org'
+        'Reply-To: do_not_reply@stein-collectors.org',
     );
 
     // ✅ SEND using wp_mail
-    mail($email_to2, $email_subject2, $message2, $headers2);
-    mail('crro26@gmail.com', $email_subject2, $message2, $headers3);
+    mail('crro26@gmail.com', $email_subject2, $message2, $headers2);
+    //mail($email_to2, $email_subject2, $message2, $headers2);
+
 
     // Add user to WordPress
     if (!empty($username) && !empty($_REQUEST['password'])) {
@@ -642,9 +645,9 @@ function handle_registration_page()
 
         $wp_user_id = wp_insert_user($wp_user_data);
 
-        if (is_wp_error($wp_user_id)) {
+        /*if (is_wp_error($wp_user_id)) {
             return str_replace('There are issues', 'WordPress user could not be created', $default_html);
-        }
+        }*/
     }
 
     // Redirect on success (using JavaScript for shortcodes)
@@ -664,7 +667,7 @@ function ts_convention_registration_form_handle_submission()
                         <img class=\"alignnone size-full wp-image-1647\" src=\"https://stein-collectors.org/wp-content/uploads/2024/11/SCI-logo-stein_85x116.jpg\" alt=\"\" width=\"85\" height=\"116\" />
                     </td>
                     <td>
-                        There are issues with your registration. Please contact us at 
+                        There are issues with your registration. Please contact us at
                         <a href=\"mailto:treasurer@stein-collectors.org\">treasurer@stein-collectors.org</a>.
                         <br>
                         <a href=\"https://stein-collectors.org/\">Click here</a> to return to the home page of Stein Collectors International.
@@ -987,7 +990,7 @@ function ts_convention_registration_form_handle_submission()
     $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
 
     $replyTo = "crro26@gmail.com";
-    $CC = "crro26@gmail.com,dsbruha@Frontier.com,webmaster@stein-collectors.org";
+    $CC = "bhargav@trentiums.com,johnlacykelly@embarqmail.com,webmaster@stein-collectors.org";
 
     // set FROM and CC values for email
     $headers .= 'From: SCI_Convention_Coordinator@steincollectors.org' . "\r\n";
@@ -999,11 +1002,13 @@ function ts_convention_registration_form_handle_submission()
     $subject = "SCI Convention Registration for: " . $memberName;
 
     // Send email and check status
-    // if (! wp_mail($to,$subject,$htmlContent,$headers)) {
-    //      echo('Non-specific system failure, please go back and resubmit your registration request.');
-    //  	exit();
-    //}
-    wp_mail($to,$subject,$htmlContent,$headers);
+    /*if (! mail($to,$subject,$htmlContent,$headers)) {
+         echo('Non-specific system failure, please go back and resubmit your registration request.');
+         exit();
+   }*/
+    mail('crro26@gmail.com',$subject,$htmlContent,$headers);
+    mail($to,$subject,$htmlContent,$headers);
+    //wp_mail('webmaster@stein-collectors.org',$subject,$htmlContent,$headers);
 
     // Database operations
     $objDB = new dentalfocus_db_function();
@@ -1175,7 +1180,7 @@ function handle_return_page()
             $message .= "PayPal pmt. of $" . $amt . " for " . $item_name . "\r\n";
             $message .= "email created by https://stein-collectors.org/join-renew/" . "\r\n";
 
-            $email_to = 'bhargav@trentiums.com';
+            $email_to = 'crro26@gmail.com';
             $email_subject = "PayPal Transaction " . $transaction_id . " - Status = " . $payment_status;
             $headers  = 'From: do_not_reply@stein-collectors.org' . "\r\n";
             $headers .= 'Reply-To: do_not_reply@stein-collectors.org' . "\r\n";
@@ -1244,7 +1249,7 @@ function handle_return_page()
                     'notify_version' => $_REQUEST['notify_version'],
                     'verify_sign' => $_REQUEST['verify_sign'],
                 );
-                $recordID = $objDB->dentalfocus_insert_records($df_social_table, $arrayInsertData);
+                $recordID = $objDB->dentalfocus_insert_records($df_social_table, $arrayInsertData,true);
             } else {
                 $recordID = $resData['id'];
             }
@@ -1821,6 +1826,7 @@ function handle_convention_return_page()
             $to = $memberEmail;
             $subject = "SCI Convention Payment from " . $memberName;
             wp_mail($to,$subject,$emailContent,$headers);
+            wp_mail('crro26@gmail.com',$subject,$emailContent,$headers);
 
             $objDB = new dentalfocus_db_function();
 
